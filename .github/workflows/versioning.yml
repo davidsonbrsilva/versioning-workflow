@@ -1,0 +1,48 @@
+name: Versioning
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  pull_request:
+    branches: ["main"]
+    types: ["closed"]
+
+jobs:
+  generate_version:
+    name: Generate version
+    runs-on: ubuntu-latest
+    outputs:
+      should_create_version: ${{ steps.generate_version.outputs.should_create_version }}
+      version: ${{ steps.generate_version.outputs.version }}
+      last_stable_version: ${{ steps.generate_version.outputs.last_stable_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Generate version
+        id: generate_version
+        if: github.event.pull_request.merged == true
+        run: bash scripts/versioning.sh
+        env:
+          ORIGIN_BRANCH: ${{ github.event.pull_request.head.ref }}
+          HEAD_COMMIT: ${{ github.event.pull_request.head.sha }}
+          BASE_COMMIT: ${{ github.event.pull_request.base.sha }}
+
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs: generate_version
+    if: needs.generate_version.outputs.should_create_version == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Create release
+        id: create_release
+        run: bash scripts/release.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.generate_version.outputs.version }}
+          LAST_STABLE_VERSION: ${{ needs.generate_version.outputs.last_stable_version }}
