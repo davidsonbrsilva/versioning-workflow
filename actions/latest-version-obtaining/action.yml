@@ -15,10 +15,12 @@ runs:
 
     - name: Get last version
       id: get_last_version
+      shell: bash
       run: bash actions/latest-version-obtaining/latest-version-obtaining.sh
 
     - name: Check if is release candidate
       id: check_if_is_rc
+      shell: bash
       run: bash actions/latest-version-obtaining/release-candidate-checking.sh
       env:
         VERSION: ${{ steps.get_last_version.outputs.last_version }}

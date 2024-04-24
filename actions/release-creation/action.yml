@@ -22,6 +22,7 @@ runs:
 
     - name: Create release
       id: create_release
+      shell: bash
       run: bash scripts/release-creation.sh
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
