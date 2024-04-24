@@ -15,7 +15,6 @@ inputs:
     required: false
 runs:
   using: "composite"
-  name: Create release
   steps:
     - name: Checkout code
       uses: actions/checkout@v4

@@ -22,7 +22,6 @@ outputs:
     value: ${{ steps.generate_next_release.outputs.version }}
 runs:
   using: "composite"
-  name: Generate next release version
   steps:
     - name: Checkout code
       uses: actions/checkout@v4
