@@ -1,0 +1,109 @@
+name: Pre-release Template
+
+on:
+  workflow_call:
+
+jobs:
+  get_last_version:
+    name: Get last version
+    runs-on: ubuntu-latest
+    outputs:
+      last_version: ${{ steps.get_last_version.outputs.last_version }}
+      is_release_candidate: ${{ steps.check_if_is_rc.outputs.is_release_candidate }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get last version
+        id: get_last_version
+        run: bash scripts/latest-version-obtaining.sh
+
+      - name: Check if is release candidate
+        id: check_if_is_rc
+        run: bash scripts/release-candidate-checking.sh
+        env:
+          VERSION: ${{ steps.get_last_version.outputs.last_version }}
+
+  generate_first_release_candidate_version:
+    name: Generate first release candidate version
+    runs-on: ubuntu-latest
+    needs: get_last_version
+    outputs:
+      version: ${{ steps.add_rc_suffix.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate next release version
+        id: generate_next_release
+        run: bash scripts/release-versioning.sh
+        env:
+          ORIGIN_BRANCH: ${{ github.head_ref }}
+          HEAD_COMMIT: ${{ github.event.pull_request.head.sha }}
+          BASE_COMMIT: ${{ github.event.pull_request.base.sha }}
+          LAST_VERSION: ${{ needs.get_last_version.outputs.last_version }}
+
+      - name: Add release candidate suffix
+        id: add_rc_suffix
+        run: |
+          new_tag=${{ steps.generate_next_release.outputs.version }}-rc-1
+          echo "version=$new_tag" >> $GITHUB_OUTPUT
+          echo "New generated version: $new_tag."
+    if: ${{ !needs.get_last_version.outputs.is_release_candidate }}
+
+  increment_release_candidate_version:
+    name: Increment release candidate version
+    runs-on: ubuntu-latest
+    needs: get_last_version
+    outputs:
+      version: ${{ steps.increment_rc_suffix.outputs.version }}
+    steps:
+      - name: Increment release candidate suffix
+        id: increment_rc_suffix
+        run: |
+          regex="([0-9]+)\.([0-9]+)\.([0-9]+)-rc-([0-9]+)"
+
+          if [[ ${{ needs.get_last_version.outputs.last_version }} =~ $regex ]]; then
+            major_version="${BASH_REMATCH[1]}"
+            minor_version="${BASH_REMATCH[2]}"
+            patch_version="${BASH_REMATCH[3]}"
+            rc_version="${BASH_REMATCH[4]}"
+
+            rc_version=$((rc_version + 1))
+            new_tag=${major_version}.${minor_version}.${patch_version}-rc-${rc_version}
+            echo "version=$new_tag" >> $GITHUB_OUTPUT
+            echo "New generated version: $new_tag."
+            exit 0
+          fi
+
+          echo "The version ${{ needs.get_last_version.outputs.last_version }} does not match a valid release candidate version."
+          exit 1
+    if: ${{ needs.get_last_version.outputs.is_release_candidate == 'true' }}
+
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    needs:
+      [
+        generate_first_release_candidate_version,
+        increment_release_candidate_version,
+      ]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create release
+        id: create_release
+        run: bash scripts/release-creation.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.generate_first_release_candidate_version.outputs.version || needs.increment_release_candidate_version.outputs.version }}
+          TARGET_COMMIT: ${{ github.event.pull_request.head.sha }}
+          PRE_RELEASE: true
+    if: |
+      always() &&
+      ((needs.generate_first_release_candidate_version.result == 'success' && needs.increment_release_candidate_version.result == 'skipped') ||
+      (needs.generate_first_release_candidate_version.result == 'skipped' && needs.increment_release_candidate_version.result == 'success')
+      )

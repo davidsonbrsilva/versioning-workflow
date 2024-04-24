@@ -1,0 +1,95 @@
+name: Release Template
+
+on:
+  workflow_call:
+
+jobs:
+  get_last_version:
+    name: Get last version
+    runs-on: ubuntu-latest
+    outputs:
+      last_version: ${{ steps.get_last_version.outputs.last_version }}
+      is_release_candidate: ${{ steps.check_if_is_rc.outputs.is_release_candidate }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get last version
+        id: get_last_version
+        run: bash scripts/latest-version-obtaining.sh
+
+      - name: Check if is release candidate
+        id: check_if_is_rc
+        run: bash scripts/release-candidate-checking.sh
+        env:
+          VERSION: ${{ steps.get_last_version.outputs.last_version }}
+
+  generate_next_release_version:
+    name: Generate next release version
+    runs-on: ubuntu-latest
+    needs: get_last_version
+    outputs:
+      version: ${{ steps.generate_next_release.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate next release version
+        id: generate_next_release
+        run: bash scripts/release-versioning.sh
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          LAST_VERSION: ${{ needs.get_last_version.outputs.last_version }}
+    if: ${{ !needs.get_last_version.outputs.is_release_candidate }}
+
+  remove_release_candidate_suffix:
+    name: Remove release candidate suffix
+    runs-on: ubuntu-latest
+    needs: get_last_version
+    outputs:
+      version: ${{ steps.remove_rc_suffix.outputs.version }}
+    steps:
+      - name: Remove release candidate suffix
+        id: remove_rc_suffix
+        run: |
+          regex="([0-9]+)\.([0-9]+)\.([0-9]+)-rc-([0-9]+)"
+
+          if [[ ${{ needs.get_last_version.outputs.last_version }} =~ $regex ]]; then
+            major_version="${BASH_REMATCH[1]}"
+            minor_version="${BASH_REMATCH[2]}"
+            patch_version="${BASH_REMATCH[3]}"
+
+            new_tag=${major_version}.${minor_version}.${patch_version}
+            echo "version=$new_tag" >> $GITHUB_OUTPUT
+            echo "New generated version: $new_tag."
+            exit 0
+          fi
+
+          echo "The version ${{ needs.get_last_version.outputs.last_version }} does not match a valid release candidate version."
+          exit 1
+        env:
+          VERSION: ${{ needs.get_last_version.outputs.last_version }}
+    if: ${{ needs.get_last_version.outputs.is_release_candidate == 'true' }}
+
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    needs: [generate_next_release_version, remove_release_candidate_suffix]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create release
+        id: create_release
+        run: bash scripts/release-creation.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.generate_next_release_version.outputs.version || needs.remove_release_candidate_suffix.outputs.version }}
+          TARGET_COMMIT: ${{ github.event.head_commit.id }}
+    if: |
+      always() &&
+      ((needs.generate_next_release_version.result == 'success' && needs.remove_release_candidate_suffix.result == 'skipped') ||
+      (needs.generate_next_release_version.result == 'skipped' && needs.remove_release_candidate_suffix.result == 'success')
+      )

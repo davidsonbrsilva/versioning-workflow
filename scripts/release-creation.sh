@@ -10,6 +10,11 @@ if [[ -z "$VERSION" ]]; then
   missing_parameter=true
 fi
 
+if [[ -z "$TARGET_COMMIT" ]]; then
+  echo "'TARGET_COMMIT' is required."
+  missing_parameter=true
+fi
+
 if [ "$missing_parameter" == true ]; then
   exit 1
 fi
@@ -18,10 +23,8 @@ if [[ -z "$RELEASE_NAME" ]]; then
   RELEASE_NAME=$VERSION
 fi
 
-CHANGELOG="Released by @${GITHUB_ACTOR}"
-
-if [[ -n "$LAST_STABLE_VERSION" ]]; then
-  CHANGELOG=$"$CHANGELOG\nChangelog: https://github.com/$GITHUB_REPOSITORY/compare/$LAST_STABLE_VERSION...$VERSION"
+if [[ "$PRE_RELEASE" != "true" ]]; then
+  PRE_RELEASE="false"
 fi
 
 # URL da API de releases
@@ -35,11 +38,11 @@ RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
   -H "Content-Type: application/json" \
   -d "{
     \"tag_name\": \"$VERSION\",
-    \"target_commitish\": \"main\",
+    \"target_commitish\": \"$TARGET_COMMIT\",
     \"name\": \"$RELEASE_NAME\",
-    \"body\": \"$CHANGELOG\",
     \"draft\": false,
-    \"prerelease\": false
+    \"prerelease\": $PRE_RELEASE,
+    \"generate_release_notes\": true
   }" \
   $URL)
 
