@@ -16,11 +16,11 @@ runs:
     - name: Get last version
       id: get_last_version
       shell: bash
-      run: latest-version-obtaining.sh
+      run: ./latest-version-obtaining.sh
 
     - name: Check if is release candidate
       id: check_if_is_rc
       shell: bash
-      run: release-candidate-checking.sh
+      run: ./release-candidate-checking.sh
       env:
         VERSION: ${{ steps.get_last_version.outputs.last_version }}
