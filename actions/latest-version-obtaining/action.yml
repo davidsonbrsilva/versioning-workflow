@@ -1,16 +1,12 @@
 name: "Latest Version Obtaining"
 description: "Get the last version in the repository"
 outputs:
-  last_version: 
+  last_version:
     description: "The last version generated"
     value: ${{ steps.get_last_version.outputs.last_version }}
-  is_release_candidate: 
+  is_release_candidate:
     description: "Indicates if the last version obtained is release candidate"
     value: ${{ steps.check_if_is_rc.outputs.is_release_candidate }}
-outputs:
-  random-number:
-    description: "Random number"
-    value: ${{ steps.random-number-generator.outputs.random-number }}
 runs:
   using: "composite"
   steps:

@@ -1,0 +1,26 @@
+name: "Release Creation"
+description: "Create a new release"
+inputs:
+  token:
+    description: "The token with writing permissions"
+    required: true
+  version:
+    description: "The application version that will be released"
+    required: true
+  target_commit:
+    description: "The commit that links the release"
+    required: true
+runs:
+  using: "composite"
+  name: Create release
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create release
+      id: create_release
+      run: bash scripts/release-creation.sh
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+        VERSION: ${{ inputs.version }}
+        TARGET_COMMIT: ${{ inputs.target_commit }}

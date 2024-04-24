@@ -1,0 +1,38 @@
+name: "Release Versioning"
+description: "Generate a new version"
+inputs:
+  commit_message:
+    description: "The commit message of the new modifications"
+    required: false
+  origin_branch:
+    description: "The reference source branch"
+    required: false
+  last_version:
+    description: "The last version to use as base in the creation of the new version"
+    required: true
+  head_commit:
+    description: "It is the head commit of the pull request event"
+    required: false
+  base_commit:
+    description: "It is the base commit of the pull request event"
+    required: false
+outputs:
+  version:
+    description: "The new generated version"
+    value: ${{ steps.generate_next_release.outputs.version }}
+runs:
+  using: "composite"
+  name: Generate next release version
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Generate next release version
+      id: generate_next_release
+      run: bash scripts/release-versioning.sh
+      env:
+        COMMIT_MESSAGE: ${{ inputs.commit_message }}
+        ORIGIN_BRANCH: ${{ inputs.origin_branch }}
+        HEAD_COMMIT: ${{ inputs.head_commit }}
+        BASE_COMMIT: ${{ inputs.base_commit }}
+        LAST_VERSION: ${{ inputs.last_version }}
