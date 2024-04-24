@@ -10,6 +10,9 @@ inputs:
   target_commit:
     description: "The commit that links the release"
     required: true
+  pre_release:
+    description: "Indicates if the version to be created is a release candidate"
+    required: false
 runs:
   using: "composite"
   name: Create release
@@ -24,3 +27,4 @@ runs:
         GITHUB_TOKEN: ${{ inputs.token }}
         VERSION: ${{ inputs.version }}
         TARGET_COMMIT: ${{ inputs.target_commit }}
+        PRE_RELEASE: ${{ inputs.pre_release }}
