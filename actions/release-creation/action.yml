@@ -1,0 +1,36 @@
+name: "Release Creation"
+description: "Create a new release"
+inputs:
+  token:
+    description: "The token with writing permissions"
+    required: true
+  version:
+    description: "The application version that will be released"
+    required: true
+  target_commit:
+    description: "The commit that links the release"
+    required: true
+  pre_release:
+    description: "Indicates if the version to be created is a release candidate"
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set GitHub path
+      run: echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
+      shell: bash
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+
+    - name: Create release
+      id: create_release
+      shell: bash
+      run: release-creation.sh
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+        VERSION: ${{ inputs.version }}
+        TARGET_COMMIT: ${{ inputs.target_commit }}
+        PRE_RELEASE: ${{ inputs.pre_release }}

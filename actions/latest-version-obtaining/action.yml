@@ -1,0 +1,32 @@
+name: "Latest Version Obtaining"
+description: "Get the last version in the repository"
+outputs:
+  last_version:
+    description: "The last version generated"
+    value: ${{ steps.get_last_version.outputs.last_version }}
+  is_release_candidate:
+    description: "Indicates if the last version obtained is release candidate"
+    value: ${{ steps.check_if_is_rc.outputs.is_release_candidate }}
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set GitHub path
+      run: echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
+      shell: bash
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+
+    - name: Get last version
+      id: get_last_version
+      shell: bash
+      run: latest-version-obtaining.sh
+
+    - name: Check if is release candidate
+      id: check_if_is_rc
+      shell: bash
+      run: release-candidate-checking.sh
+      env:
+        VERSION: ${{ steps.get_last_version.outputs.last_version }}

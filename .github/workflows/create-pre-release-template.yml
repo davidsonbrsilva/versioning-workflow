@@ -9,20 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       last_version: ${{ steps.get_last_version.outputs.last_version }}
-      is_release_candidate: ${{ steps.check_if_is_rc.outputs.is_release_candidate }}
+      is_release_candidate: ${{ steps.get_last_version.outputs.is_release_candidate }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Get last version
         id: get_last_version
-        run: bash scripts/latest-version-obtaining.sh
-
-      - name: Check if is release candidate
-        id: check_if_is_rc
-        run: bash scripts/release-candidate-checking.sh
-        env:
-          VERSION: ${{ steps.get_last_version.outputs.last_version }}
+        uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@v1
 
   generate_first_release_candidate_version:
     name: Generate first release candidate version
@@ -36,12 +30,12 @@ jobs:
 
       - name: Generate next release version
         id: generate_next_release
-        run: bash scripts/release-versioning.sh
-        env:
-          ORIGIN_BRANCH: ${{ github.head_ref }}
-          HEAD_COMMIT: ${{ github.event.pull_request.head.sha }}
-          BASE_COMMIT: ${{ github.event.pull_request.base.sha }}
-          LAST_VERSION: ${{ needs.get_last_version.outputs.last_version }}
+        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@v1
+        with:
+          origin_branch: ${{ github.head_ref }}
+          head_commit: ${{ github.event.pull_request.head.sha }}
+          base_commit: ${{ github.event.pull_request.base.sha }}
+          last_version: ${{ needs.get_last_version.outputs.last_version }}
 
       - name: Add release candidate suffix
         id: add_rc_suffix
@@ -96,12 +90,12 @@ jobs:
 
       - name: Create release
         id: create_release
-        run: bash scripts/release-creation.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ needs.generate_first_release_candidate_version.outputs.version || needs.increment_release_candidate_version.outputs.version }}
-          TARGET_COMMIT: ${{ github.event.pull_request.head.sha }}
-          PRE_RELEASE: true
+        uses: davidsonbrsilva/versioning-workflow/actions/release-creation@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: ${{ needs.generate_first_release_candidate_version.outputs.version || needs.increment_release_candidate_version.outputs.version }}
+          target_commit: ${{ github.event.pull_request.head.sha }}
+          pre_release: true
     if: |
       always() &&
       ((needs.generate_first_release_candidate_version.result == 'success' && needs.increment_release_candidate_version.result == 'skipped') ||
