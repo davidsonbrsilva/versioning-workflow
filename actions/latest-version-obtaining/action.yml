@@ -13,6 +13,12 @@ runs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Set GitHub path
+      run: echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
+      shell: bash
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+
     - name: Get last version
       id: get_last_version
       shell: bash
