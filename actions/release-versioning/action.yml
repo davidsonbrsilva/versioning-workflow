@@ -36,7 +36,7 @@ runs:
     - name: Generate next release version
       id: generate_next_release
       shell: bash
-      run: ./release-versioning.sh
+      run: release-versioning.sh
       env:
         COMMIT_MESSAGE: ${{ inputs.commit_message }}
         ORIGIN_BRANCH: ${{ inputs.origin_branch }}
