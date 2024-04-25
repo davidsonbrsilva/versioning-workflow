@@ -47,6 +47,7 @@ RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
   $URL)
 
 if [ "$RESPONSE_CODE" -eq "201" ]; then
+  echo "version=$VERSION" >> $GITHUB_OUTPUT
   echo "New generated release: $RELEASE_NAME"
   exit 0
 fi

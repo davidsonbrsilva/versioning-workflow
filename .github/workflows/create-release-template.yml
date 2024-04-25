@@ -2,6 +2,10 @@ name: Release Template
 
 on:
   workflow_call:
+    outputs:
+      version:
+        description: The new generated version
+        value: ${{ jobs.create_release.outputs.version }}
 
 jobs:
   get_last_version:
@@ -71,6 +75,8 @@ jobs:
     needs: [generate_next_release_version, remove_release_candidate_suffix]
     permissions:
       contents: write
+    outputs:
+      version: ${{ steps.create_release.outputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
