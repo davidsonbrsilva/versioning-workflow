@@ -41,7 +41,7 @@ if [ "$missing_parameter" == true ]; then
   # Check if the commit message is breaking change.
   breaking_change_regex="^BREAKING CHANGE:.*$|^[^\s]+!:.*$"
 
-  if [[ $COMMIT_MESSAGE =~ breaking_change_regex ]]; then
+  if [[ $COMMIT_MESSAGE =~ $breaking_change_regex ]]; then
     major_version=$((major_version + 1))
     new_tag="${major_version}.0.0"
     echo "A breaking change was identified."
