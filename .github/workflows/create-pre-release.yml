@@ -1,0 +1,13 @@
+name: Pre-release
+
+on:
+  pull_request:
+    branches: ["main"]
+    types: ["opened", "synchronize", "reopened"]
+
+jobs:
+  create_release_candidate:
+    name: Create release candidate
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@main
+    permissions:
+      contents: write
