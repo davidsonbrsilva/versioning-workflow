@@ -30,7 +30,7 @@ jobs:
             # git tag $tag_name
 
             # Push new reference
-            git push origin --tags
+            git push origin $tag_name
 
             echo "$tag_name updated successfully."
             exit 0
