@@ -8,6 +8,6 @@ on:
 jobs:
   create_release_candidate:
     name: Create release candidate
-    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@main
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@v0
     permissions:
       contents: write
