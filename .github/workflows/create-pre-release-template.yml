@@ -16,7 +16,7 @@ jobs:
 
       - name: Get last version
         id: get_last_version
-        uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@v1
+        uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@main
 
   generate_first_release_candidate_version:
     name: Generate first release candidate version
@@ -30,7 +30,7 @@ jobs:
 
       - name: Generate next release version
         id: generate_next_release
-        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@v1
+        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@main
         with:
           origin_branch: ${{ github.head_ref }}
           head_commit: ${{ github.event.pull_request.head.sha }}
@@ -90,7 +90,7 @@ jobs:
 
       - name: Create release
         id: create_release
-        uses: davidsonbrsilva/versioning-workflow/actions/release-creation@v1
+        uses: davidsonbrsilva/versioning-workflow/actions/release-creation@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ needs.generate_first_release_candidate_version.outputs.version || needs.increment_release_candidate_version.outputs.version }}
