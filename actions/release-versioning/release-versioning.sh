@@ -39,7 +39,9 @@ if [ "$missing_parameter" == true ]; then
   fi
 
   # Check if the commit message is breaking change.
-  if [[ $COMMIT_MESSAGE == 'BREAKING CHANGE:'* ]]; then
+  breaking_change_regex="^BREAKING CHANGE:.*$|^[^\s]+!:.*$"
+
+  if [[ $COMMIT_MESSAGE =~ breaking_change_regex ]]; then
     major_version=$((major_version + 1))
     new_tag="${major_version}.0.0"
     echo "A breaking change was identified."
@@ -75,7 +77,7 @@ if [ "$missing_parameter" == true ]; then
 fi
 
 # Search for commits that contains BREAKING CHANGE message to increment the major version.
-breaking_change_count=$(git log --format=%B $HEAD_COMMIT...$BASE_COMMIT | grep -c '^BREAKING CHANGE:.*')
+breaking_change_count=$(git log --format=%B $HEAD_COMMIT...$BASE_COMMIT | grep -c "$breaking_change_regex")
 if [[ $breaking_change_count -gt 0 ]]; then
   major_version=$((major_version + 1))
   new_tag="${major_version}.0.0"
