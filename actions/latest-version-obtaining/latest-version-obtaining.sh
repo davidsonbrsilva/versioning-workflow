@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Fetch tags from remote.
-git fetch origin --tags > /dev/null 2>&1 || { echo "Failed to fetch tags from remote."; exit 1; }
+git fetch --unshallow origin --tags > /dev/null 2>&1 || { echo "Failed to fetch tags from remote."; exit 1; }
 
 # Get the last repository tag.
 last_version=$(git tag --sort=version:refname | grep -v '^v' | tail -n 1)
