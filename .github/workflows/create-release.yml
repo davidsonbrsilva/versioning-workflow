@@ -13,6 +13,8 @@ jobs:
   upsert_major_version:
     name: Upsert major version
     needs: create_release
+    permissions:
+      contents: write
     uses: davidsonbrsilva/versioning-workflow/.github/workflows/upsert-major-version-template.yml@main
     with:
       version: ${{ needs.create_release.outputs.version }}
