@@ -13,6 +13,10 @@ inputs:
   pre_release:
     description: "Indicates if the version to be created is a release candidate"
     required: false
+outputs:
+  version:
+    description: "The generated release version"
+    value: ${{ steps.create_release.outputs.version }}
 runs:
   using: "composite"
   steps:
