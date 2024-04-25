@@ -1,0 +1,18 @@
+name: Release
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  create_release:
+    name: Create release
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-release-template.yml@main
+    permissions:
+      contents: write
+  upsert_major_version:
+    name: Upsert major version
+    needs: create_release
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/upsert-major-version-template.yml@main
+    with:
+      version: ${{ needs.create_release.outputs.version }}
