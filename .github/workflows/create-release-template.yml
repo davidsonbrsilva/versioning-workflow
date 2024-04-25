@@ -88,7 +88,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ needs.generate_next_release_version.outputs.version || needs.remove_release_candidate_suffix.outputs.version }}
           target_commit: ${{ github.event.head_commit.id }}
-          pre_release: true
     if: |
       always() &&
       ((needs.generate_next_release_version.result == 'success' && needs.remove_release_candidate_suffix.result == 'skipped') ||
