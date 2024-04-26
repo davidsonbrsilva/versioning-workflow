@@ -1,3 +1,5 @@
+#!/bin/bash
+
 regex="([0-9]+)\.([0-9]+)\.([0-9]+)-rc-([0-9]+)"
 
 if [[ $VERSION =~ $regex ]]; then
