@@ -149,7 +149,7 @@ jobs:
             version=$(git tag -l "$version*" | sort -V | tail -n 1)
             if [[ $version =~ $regex ]]; then
               rc_version="${BASH_REMATCH[4]}"
-              rc_version=(($rc_version + 1))
+              rc_version=$((rc_version + 1))
             fi
           fi
 
