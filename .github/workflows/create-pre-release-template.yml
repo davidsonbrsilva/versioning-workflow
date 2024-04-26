@@ -133,6 +133,7 @@ jobs:
     needs:
       [
         get_last_version,
+        check_major_change,
         generate_breaking_change_version,
         generate_first_release_candidate_version,
       ]
@@ -146,7 +147,7 @@ jobs:
           echo "New generated version: $new_tag."
     if: |
       always() && !failure() && !cancelled() &&
-      !needs.get_last_version.outputs.is_release_candidate
+      needs.check_major_change.outputs.is_major_change || !needs.get_last_version.outputs.is_release_candidate
 
   create_release:
     name: Create release
