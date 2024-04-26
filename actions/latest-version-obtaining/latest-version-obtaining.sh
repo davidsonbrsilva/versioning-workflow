@@ -19,11 +19,11 @@ is_published=$(git branch --contains $repository_last_version | grep "main")
 
 echo "Was published: $is_published"
 
-last_version=$(echo -e "$origin_branch_last_version\n$repository_last_version" | sort -V | tail -n 1)
+last_version=$repository_last_version
 
-if [[ -n "$is_published" ]]; then
-  echo "The tag version was published in production."
-  last_version=$repository_last_version
+if [[ -z "$is_published" ]]; then
+  echo "The tag version was not published in production."
+  last_version=$(echo -e "$origin_branch_last_version\n$repository_last_version" | sort -V | tail -n 1)
 fi
 
 echo "Choosed version: $last_version"
