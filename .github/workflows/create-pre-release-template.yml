@@ -43,9 +43,9 @@ jobs:
         id: check_major_change
         run: |
           commit_message="${{ steps.get_commit_message.outputs.commit_message }}"
-          major_change_regex="(^FIRST RELEASE:.*$)|(^BREAKING CHANGE:.*$)|(^[^\s]+!:.*$)"
+          major_change_regex="(^FIRST RELEASE:.*$)|(^BREAKING CHANGE:.*$)|(^.*[^[:space:]]+!:.*$)"
 
-          if [[ $commit_message =~ $major_change_regex ]]; then
+          if [[ "$commit_message" =~ $major_change_regex ]]; then
             echo "A major change was identified."
             echo "is_major_change=true" >> $GITHUB_OUTPUT
             exit 0
