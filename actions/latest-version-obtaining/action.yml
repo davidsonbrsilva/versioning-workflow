@@ -7,6 +7,9 @@ outputs:
   is_release_candidate:
     description: "Indicates if the last version obtained is release candidate"
     value: ${{ steps.check_if_is_rc.outputs.is_release_candidate }}
+  is_breaking_change:
+    description: "Indicates if the last version obtained is breaking change"
+    value: ${{ steps.check_if_is_breaking_change.outputs.is_breaking_change }}
 runs:
   using: "composite"
   steps:
@@ -28,5 +31,12 @@ runs:
       id: check_if_is_rc
       shell: bash
       run: release-candidate-checking.sh
+      env:
+        VERSION: ${{ steps.get_last_version.outputs.last_version }}
+
+    - name: Check if is breaking change
+      id: check_if_is_breaking_change
+      shell: bash
+      run: breaking_change_checking.sh
       env:
         VERSION: ${{ steps.get_last_version.outputs.last_version }}
