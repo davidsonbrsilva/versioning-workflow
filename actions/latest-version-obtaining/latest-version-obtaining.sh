@@ -12,21 +12,23 @@ git fetch --unshallow origin --tags > /dev/null 2>&1 || { echo "Failed to fetch 
 origin_branch_last_version=$(git tag --sort=committerdate --merged=$(git rev-parse "origin/$ORIGIN_BRANCH") | grep -v '^v' | tail -n 1)
 repository_last_version=$(git tag --sort=committerdate | grep -v '^v' | tail -n 1)
 
-echo "Origin branch last version: $origin_branch_last_version"
-echo "Main branch last version: $repository_last_version"
+echo "Last branch version: $origin_branch_last_version"
+echo "Last repository version: $repository_last_version"
 
-is_published=$(git branch --contains $repository_last_version | grep "main")
-
-echo "Was published: $is_published"
+is_origin_branch_version_published=$(git branch -a --contains $origin_branch_last_version | grep "origin/main")
+is_repository_version_published=$(git branch -a --contains $repository_last_version | grep "origin/main")
 
 last_version=$(echo -e "$origin_branch_last_version\n$repository_last_version" | sort -V | tail -n 1)
 
-if [[ -n "$is_published" ]]; then
-  echo "The tag version was published in production."
-  last_version=$repository_last_version
+if [[ -n "$is_origin_branch_version_published" ]]; then
+  last_version=$origin_branch_last_version
+  echo "The branch version is already in 'main'."
 fi
 
-echo "Choosed version: $last_version"
+if [[ -n "$is_repository_version_published" ]]; then
+  last_version=$repository_last_version
+  echo "The repository version is already in 'main'."
+fi
 
 if [[ -z "$last_version" ]]; then
   echo "No found version associated with this branch."
@@ -34,5 +36,5 @@ if [[ -z "$last_version" ]]; then
 fi
 
 echo "last_version=$last_version" >> $GITHUB_OUTPUT
-echo "Last found version: $last_version"
+echo "Choosen version: $last_version"
 exit 0
