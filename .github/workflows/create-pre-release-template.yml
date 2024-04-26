@@ -53,10 +53,7 @@ jobs:
 
           echo "No major change was identified."
           exit 0
-    if: |
-      always() &&
-      needs.get_last_version.result == 'success' && 
-      !needs.get_last_version.outputs.is_breaking_change
+    if: ${{ !needs.get_last_version.outputs.is_breaking_change }}
 
   generate_breaking_change_version:
     name: Generate breaking change version
@@ -74,10 +71,7 @@ jobs:
         with:
           commit_message: ${{ github.event.head_commit.message }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
-    if: |
-      always() &&
-      (needs.check_major_change.result == 'success' || needs.check_major_change.result == 'skipped') &&
-      needs.check_major_change.outputs.is_major_change == 'true'
+    if: ${{ needs.check_major_change.outputs.is_major_change == 'true' }}
 
   generate_first_release_candidate_version:
     name: Generate first release candidate version
@@ -98,9 +92,7 @@ jobs:
           base_commit: ${{ github.event.pull_request.base.sha }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
     if: |
-      always() &&
-      needs.get_last_version.result == 'success' &&
-      (needs.check_major_change.result == 'success' || needs.check_major_change.result == 'skipped') &&
+      always() && !failure() && !cancelled() &&
       !needs.check_major_change.outputs.is_major_change
 
   increment_release_candidate_version:
@@ -130,10 +122,7 @@ jobs:
 
           echo "The version ${{ needs.get_last_version.outputs.last_version }} does not match a valid release candidate version."
           exit 1
-    if: |
-      always() &&
-      needs.get_last_version.result == 'success' && 
-      needs.get_last_version.outputs.is_release_candidate == 'true'
+    if: ${{ needs.get_last_version.outputs.is_release_candidate == 'true' }}
 
   add_release_candidate_version:
     name: Add release candidate version
@@ -155,10 +144,7 @@ jobs:
           echo "version=$new_tag" >> $GITHUB_OUTPUT
           echo "New generated version: $new_tag."
     if: |
-      always() &&
-      needs.get_last_version.result == 'success' &&
-      ((needs.generate_breaking_change_version.result == 'success' && needs.generate_first_release_candidate_version.result == 'skipped') ||
-      (needs.generate_breaking_change_version.result == 'skipped' && needs.generate_first_release_candidate_version.result == 'success')) &&
+      always() && !failure() && !cancelled() &&
       !needs.get_last_version.outputs.is_release_candidate
 
   create_release:
@@ -181,8 +167,4 @@ jobs:
           version: ${{ needs.add_release_candidate_version.outputs.version || needs.increment_release_candidate_version.outputs.version }}
           target_commit: ${{ github.event.pull_request.head.sha }}
           pre_release: true
-    if: |
-      always() &&
-      ((needs.add_release_candidate_version.result == 'success' && needs.increment_release_candidate_version.result == 'skipped') ||
-      (needs.add_release_candidate_version.result == 'skipped' && needs.increment_release_candidate_version.result == 'success')
-      )
+    if: always() && !failure() && !cancelled()
