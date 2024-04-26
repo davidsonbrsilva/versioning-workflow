@@ -157,8 +157,8 @@ jobs:
     if: |
       always() &&
       needs.get_last_version.result == 'success' &&
-      ((needs.generate_breaking_change_version == 'success' && needs.generate_first_release_candidate_version == 'skipped') ||
-      (needs.generate_breaking_change_version == 'skipped' && needs.generate_first_release_candidate_version == 'success')) &&
+      (needs.generate_breaking_change_version == 'success' || needs.generate_breaking_change_version == 'skipped') &&
+      (needs.generate_first_release_candidate_version == 'success' || needs.generate_first_release_candidate_version == 'skipped') &&
       !needs.get_last_version.outputs.is_release_candidate
 
   create_release:
