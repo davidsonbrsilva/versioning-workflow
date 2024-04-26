@@ -36,7 +36,7 @@ jobs:
         id: generate_next_release
         uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@hotfix/fixing-major-changes-detection
         with:
-          commit_message: ${{ github.event.pull_request.head.sha }}
+          commit_message: ${{ github.event.head_commit.message }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
     if: ${{ !needs.get_last_version.outputs.is_release_candidate }}
 
