@@ -147,7 +147,10 @@ jobs:
 
           echo "The version ${{ needs.get_last_version.outputs.last_version }} does not match a valid release candidate version."
           exit 1
-    if: ${{ needs.get_last_version.outputs.is_release_candidate == 'true' }}
+    if: |
+      always() &&
+      needs.get_last_version.result == 'success' &&
+      ${{ needs.get_last_version.outputs.is_release_candidate == 'true' }}
 
   create_release:
     name: Create release
