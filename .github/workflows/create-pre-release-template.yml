@@ -22,7 +22,6 @@ jobs:
       - name: Get last version
         id: get_last_version
         uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@hotfix/fixing-major-changes-detection
-    if: always()
 
   check_major_change:
     name: Check major change
@@ -57,7 +56,7 @@ jobs:
     if: |
       always() &&
       needs.get_last_version.result == 'success' && 
-      ${{ !needs.get_last_version.outputs.is_breaking_change }}
+      !needs.get_last_version.outputs.is_breaking_change
 
   generate_breaking_change_version:
     name: Generate breaking change version
@@ -77,8 +76,8 @@ jobs:
           last_version: ${{ needs.get_last_version.outputs.last_version }}
     if: |
       always() &&
-      (needs.check_major_change.result == 'success' || needs.check_major_change.result == 'skipped')
-      ${{ needs.check_major_change.outputs.is_major_change == 'true' }}
+      (needs.check_major_change.result == 'success' || needs.check_major_change.result == 'skipped') &&
+      needs.check_major_change.outputs.is_major_change == 'true'
 
   generate_first_release_candidate_version:
     name: Generate first release candidate version
@@ -101,8 +100,8 @@ jobs:
     if: |
       always() &&
       needs.get_last_version.result == 'success' &&
-      (needs.check_major_change.result == 'success' || needs.check_major_change.result == 'skipped')
-      ${{ !needs.check_major_change.outputs.is_major_change }}
+      (needs.check_major_change.result == 'success' || needs.check_major_change.result == 'skipped') &&
+      !needs.check_major_change.outputs.is_major_change
 
   increment_release_candidate_version:
     name: Increment release candidate version
@@ -134,7 +133,7 @@ jobs:
     if: |
       always() &&
       needs.get_last_version.result == 'success' && 
-      ${{ needs.get_last_version.outputs.is_release_candidate == 'true' }}
+      needs.get_last_version.outputs.is_release_candidate == 'true'
 
   add_release_candidate_version:
     name: Add release candidate version
@@ -160,7 +159,7 @@ jobs:
       needs.get_last_version.result == 'success' &&
       ((needs.generate_breaking_change_version == 'success' && needs.generate_first_release_candidate_version == 'skipped') ||
       (needs.generate_breaking_change_version == 'skipped' && needs.generate_first_release_candidate_version == 'success')) &&
-      ${{ !needs.get_last_version.outputs.is_release_candidate }}
+      !needs.get_last_version.outputs.is_release_candidate
 
   create_release:
     name: Create release
