@@ -143,10 +143,6 @@ jobs:
           echo "New generated version: $new_tag."
     if: |
       always() &&
-      (needs.get_last_version.result == 'success') &&
-      ((needs.generate_breaking_change_version.result == 'success' && needs.generate_first_release_candidate_version.result == 'skipped') ||
-      (needs.generate_breaking_change_version.result == 'skipped' && needs.generate_first_release_candidate_version.result == 'success')
-      ) && 
       ${{ !needs.get_last_version.outputs.is_release_candidate }}
 
   create_release:
