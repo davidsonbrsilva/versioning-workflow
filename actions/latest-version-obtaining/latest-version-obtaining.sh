@@ -15,7 +15,7 @@ repository_last_version=$(git tag --sort=committerdate | grep -v '^v' | tail -n 
 echo "Origin branch last version: $origin_branch_last_version"
 echo "Main branch last version: $repository_last_version"
 
-is_published=$(git branch --contains $repository_last_version | grep "main")
+is_published=$(git branch --contains tags/$repository_last_version | grep "main")
 
 echo "Was published: $is_published"
 
