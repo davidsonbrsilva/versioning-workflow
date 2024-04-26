@@ -35,9 +35,14 @@ jobs:
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
+          if [[ -z "$COMMIT_MESSAGE" ]]; then
+            echo "'COMMIT_MESSAGE' is required."
+            exit 1
+          fi
+
           major_change_regex="(^FIRST RELEASE:.*$)|(^BREAKING CHANGE:.*$)|(^[^\s]+!:.*$)"
 
-          if [[ $COMMIT_MESSAGE =~ $breaking_change_regex ]]; then
+          if [[ "$COMMIT_MESSAGE" =~ $breaking_change_regex ]]; then
             echo "A major change was identified."
             echo "is_major_change=true >> $GITHUB_OUTPUT
             exit 0
