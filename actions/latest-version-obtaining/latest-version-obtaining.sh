@@ -10,7 +10,7 @@ git fetch --unshallow origin --tags > /dev/null 2>&1 || { echo "Failed to fetch 
 
 # Get the last repository tag.
 last_version=$(git tag --sort=committerdate --merged=$(git rev-parse "origin/$ORIGIN_BRANCH") | grep -v '^v' | tail -n 1)
-last_version=$(git tag -l "$last_version" | sort -V | tail -n 1)
+last_version=$(git tag -l "$last_version*" | sort -V | tail -n 1)
 
 if [[ -z "$last_version" ]]; then
   echo "No found version associated with this branch."
