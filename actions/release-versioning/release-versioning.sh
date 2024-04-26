@@ -39,7 +39,7 @@ if [ "$missing_parameter" == true ]; then
   fi
 
   # Check if the commit message is breaking change.
-  breaking_change_regex="^BREAKING CHANGE:.*$|^[^\s]+!:.*$"
+  breaking_change_regex="^BREAKING CHANGE:.*$|^.*[^[:space:]]+!:.*$"
 
   if [[ $COMMIT_MESSAGE =~ $breaking_change_regex ]]; then
     major_version=$((major_version + 1))
