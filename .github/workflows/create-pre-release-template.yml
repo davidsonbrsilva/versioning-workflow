@@ -93,33 +93,6 @@ jobs:
           last_version: ${{ needs.get_last_version.outputs.last_version }}
     if: ${{ !needs.check_major_change.outputs.is_major_change }}
 
-  add_release_candidate_version:
-    name: Add release candidate version
-    runs-on: ubuntu_latest
-    outputs:
-      version: ${{ steps.add_rc_suffix.outputs.version }}
-    needs:
-      [
-        get_last_version,
-        generate_breaking_change_version,
-        generate_first_release_candidate_version,
-      ]
-    steps:
-      - name: Add release candidate suffix
-        id: add_rc_suffix
-        run: |
-          version=${{ needs.generate_breaking_change_version.outputs.version }} || ${{ needs.generate_first_release_candidate_version.outputs.version }}
-          new_tag=$version-rc-1
-          echo "version=$new_tag" >> $GITHUB_OUTPUT
-          echo "New generated version: $new_tag."
-    if: |
-      always() &&
-      (needs.get_last_version.result == 'success') &&
-      ((needs.generate_breaking_change_version.result == 'success' && needs.generate_first_release_candidate_version.result == 'skipped') ||
-      (needs.generate_breaking_change_version.result == 'skipped' && needs.generate_first_release_candidate_version.result == 'success')
-      ) && 
-      ${{ !needs.get_last_version.outputs.is_release_candidate }}
-
   increment_release_candidate_version:
     name: Increment release candidate version
     runs-on: ubuntu-latest
@@ -147,10 +120,34 @@ jobs:
 
           echo "The version ${{ needs.get_last_version.outputs.last_version }} does not match a valid release candidate version."
           exit 1
+    if: ${{ needs.get_last_version.outputs.is_release_candidate == 'true' }}
+
+  add_release_candidate_version:
+    name: Add release candidate version
+    runs-on: ubuntu_latest
+    outputs:
+      version: ${{ steps.add_rc_suffix.outputs.version }}
+    needs:
+      [
+        get_last_version,
+        generate_breaking_change_version,
+        generate_first_release_candidate_version,
+      ]
+    steps:
+      - name: Add release candidate suffix
+        id: add_rc_suffix
+        run: |
+          version=${{ needs.generate_breaking_change_version.outputs.version }} || ${{ needs.generate_first_release_candidate_version.outputs.version }}
+          new_tag=$version-rc-1
+          echo "version=$new_tag" >> $GITHUB_OUTPUT
+          echo "New generated version: $new_tag."
     if: |
       always() &&
       (needs.get_last_version.result == 'success') &&
-      ${{ needs.get_last_version.outputs.is_release_candidate == 'true' }}
+      ((needs.generate_breaking_change_version.result == 'success' && needs.generate_first_release_candidate_version.result == 'skipped') ||
+      (needs.generate_breaking_change_version.result == 'skipped' && needs.generate_first_release_candidate_version.result == 'success')
+      ) && 
+      ${{ !needs.get_last_version.outputs.is_release_candidate }}
 
   create_release:
     name: Create release
