@@ -23,7 +23,7 @@ existing_tags=$(git tag -l "$last_version*")
 
 echo "Existing tags: $existing_tags"
 
-last_version=$($existing_tags | sort -V | tail -n 1)
+last_version=$(echo $existing_tags | sort -V | tail -n 1)
 
 if [[ -z "$last_version" ]]; then
   echo "No found version associated with this branch."
