@@ -27,7 +27,7 @@ runs:
       shell: bash
       run: latest-version-obtaining.sh
       env:
-        ORIGIN_BRANCH: ${{ github.head_ref || github.ref }}
+        ORIGIN_BRANCH: ${{ github.head_ref || github.ref_name }}
 
     - name: Check if is release candidate
       id: check_if_is_rc
