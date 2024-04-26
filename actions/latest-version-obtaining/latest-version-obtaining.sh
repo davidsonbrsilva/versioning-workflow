@@ -1,10 +1,15 @@
 #!/bin/bash
 
+if [[ -z "$ORIGIN_BRANCH" ]]; then
+  echo "'ORIGIN_BRANCH' is required."
+  exit 1
+fi
+
 # Fetch tags from remote.
-git fetch origin --tags > /dev/null 2>&1 || { echo "Failed to fetch tags from remote."; exit 1; }
+git fetch --unshallow origin --tags > /dev/null 2>&1 || { echo "Failed to fetch tags from remote."; exit 1; }
 
 # Get the last repository tag.
-last_version=$(git tag --sort=committerdate --merged=$(git rev-parse HEAD) | grep -v '^v' | tail -n 1)
+last_version=$(git tag --sort=committerdate --merged=$(git rev-parse "$ORIGIN_BRANCH") | grep -v '^v' | tail -n 1)
 
 if [[ -z "$last_version" ]]; then
   echo "No found version associated with this branch."
