@@ -14,6 +14,7 @@ jobs:
     outputs:
       last_version: ${{ steps.get_last_version.outputs.last_version }}
       is_release_candidate: ${{ steps.get_last_version.outputs.is_release_candidate }}
+      is_breaking_change: ${{ steps.get_last_version.outputs.is_breaking_change }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,12 +23,54 @@ jobs:
         id: get_last_version
         uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@main
 
+  check_major_change:
+    name: Check major change
+    runs-on: ubuntu-latest
+    outputs:
+      is_major_change: ${{ steps.check_major_change.outputs.is_major_change }}
+    needs: get_last_version
+    steps:
+      - name: Check if new commit is major change
+        id: check_major_change
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          major_change_regex="(^FIRST RELEASE:.*$)|(^BREAKING CHANGE:.*$)|(^[^\s]+!:.*$)"
+
+          if [[ $COMMIT_MESSAGE =~ $breaking_change_regex ]]; then
+            echo "A major change was identified."
+            echo "is_major_change=true >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "No major change was identified."
+          exit 0
+    if: ${{ !needs.get_last_version.outputs.is_breaking_change }}
+
+  generate_breaking_change_version:
+    name: Generate breaking change version
+    runs-on: ubuntu-latest
+    needs: [get_last_version, check_major_change]
+    outputs:
+      version: ${{ steps.generate_next_release.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate next release version
+        id: generate_next_release
+        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@main
+        with:
+          commit_message: ${{ github.event.head_commit.message }}
+          last_version: ${{ needs.get_last_version.outputs.last_version }}
+    if: ${{ needs.check_major_change.outputs.is_major_change == 'true' }}
+
   generate_first_release_candidate_version:
     name: Generate first release candidate version
     runs-on: ubuntu-latest
-    needs: get_last_version
+    needs: [get_last_version, check_major_change]
     outputs:
-      version: ${{ steps.add_rc_suffix.outputs.version }}
+      version: ${{ steps.generate_next_release.outputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,11 +83,25 @@ jobs:
           head_commit: ${{ github.event.pull_request.head.sha }}
           base_commit: ${{ github.event.pull_request.base.sha }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
+    if: ${{ !needs.check_major_change.outputs.is_major_change }}
 
+  add_release_candidate_version:
+    name: Add release candidate version
+    runs-on: ubuntu_latest
+    outputs:
+      version: ${{ steps.add_rc_suffix.outputs.version }}
+    needs:
+      [
+        get_last_version,
+        generate_breaking_change_version,
+        generate_first_release_candidate_version,
+      ]
+    steps:
       - name: Add release candidate suffix
         id: add_rc_suffix
         run: |
-          new_tag=${{ steps.generate_next_release.outputs.version }}-rc-1
+          version=${{ needs.generate_breaking_change_version.outputs.version }} || ${{ needs.generate_first_release_candidate_version.outputs.version }}
+          new_tag=$version-rc-1
           echo "version=$new_tag" >> $GITHUB_OUTPUT
           echo "New generated version: $new_tag."
     if: ${{ !needs.get_last_version.outputs.is_release_candidate }}
@@ -81,11 +138,7 @@ jobs:
   create_release:
     name: Create release
     runs-on: ubuntu-latest
-    needs:
-      [
-        generate_first_release_candidate_version,
-        increment_release_candidate_version,
-      ]
+    needs: [add_release_candidate_version, increment_release_candidate_version]
     permissions:
       contents: write
     outputs:
@@ -99,11 +152,11 @@ jobs:
         uses: davidsonbrsilva/versioning-workflow/actions/release-creation@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          version: ${{ needs.generate_first_release_candidate_version.outputs.version || needs.increment_release_candidate_version.outputs.version }}
+          version: ${{ needs.add_release_candidate_version.outputs.version || needs.increment_release_candidate_version.outputs.version }}
           target_commit: ${{ github.event.pull_request.head.sha }}
           pre_release: true
     if: |
       always() &&
-      ((needs.generate_first_release_candidate_version.result == 'success' && needs.increment_release_candidate_version.result == 'skipped') ||
-      (needs.generate_first_release_candidate_version.result == 'skipped' && needs.increment_release_candidate_version.result == 'success')
+      ((needs.add_release_candidate_version.result == 'success' && needs.increment_release_candidate_version.result == 'skipped') ||
+      (needs.add_release_candidate_version.result == 'skipped' && needs.increment_release_candidate_version.result == 'success')
       )
