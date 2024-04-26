@@ -30,13 +30,19 @@ jobs:
       is_major_change: ${{ steps.check_major_change.outputs.is_major_change }}
     needs: get_last_version
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+      - name: Get commit message
+        id: get_commit_message
+        run: |
+          commit_sha=${{ github.event.pull_request.head.sha }}
+          commit_message=$(curl -sSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/commits/$commit_sha" \
+            | jq -r '.commit.message')
+          echo "commit_message=$commit_message" >> $GITHUB_OUTPUT
+          echo "Last commit message: '$commit_message'"
       - name: Check if new commit is major change
         id: check_major_change
         run: |
-          commit_message=${{ github.event.head_commit.message }}
+          commit_message=${{ steps.get_commit_message.outputs.commit_message }}
           major_change_regex="(^FIRST RELEASE:.*$)|(^BREAKING CHANGE:.*$)|(^[^\s]+!:.*$)"
 
           if [[ "$commit_message" =~ $breaking_change_regex ]]; then
