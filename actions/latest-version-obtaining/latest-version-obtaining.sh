@@ -19,8 +19,6 @@ last_version=$(echo -e "$origin_branch_last_version\n$main_branch_last_version" 
 
 echo "Choosed version: $last_version"
 
-last_version=$(git tag -l "$last_version*" | sort -V | tail -n 1)
-
 if [[ -z "$last_version" ]]; then
   echo "No found version associated with this branch."
   exit 0
