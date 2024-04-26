@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ -z "$VERSION" ]]; then
+  echo "'VERSION' is required."
+  exit 1
+fi
+
 regex="([0-9]+)\.([0-9]+)\.([0-9]+)"
 
 if [[ $VERSION =~ $regex ]]; then
