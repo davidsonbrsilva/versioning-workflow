@@ -139,7 +139,7 @@ jobs:
       - name: Add release candidate suffix
         id: add_rc_suffix
         run: |
-          version=${{ needs.generate_breaking_change_version.outputs.version }} || ${{ needs.generate_first_release_candidate_version.outputs.version }}
+          version=${{ needs.generate_breaking_change_version.outputs.version || needs.generate_first_release_candidate_version.outputs.version }}
           new_tag=$version-rc-1
           echo "version=$new_tag" >> $GITHUB_OUTPUT
           echo "New generated version: $new_tag."
