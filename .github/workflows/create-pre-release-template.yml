@@ -28,6 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       is_major_change: ${{ steps.check_major_change.outputs.is_major_change }}
+      commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
     needs: get_last_version
     steps:
       - name: Get commit message
@@ -69,7 +70,7 @@ jobs:
         id: generate_next_release
         uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@hotfix/fixing-major-changes-detection
         with:
-          commit_message: ${{ github.event.head_commit.message }}
+          commit_message: ${{ needs.check_major_change.outputs.commit_message }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
     if: ${{ needs.check_major_change.outputs.is_major_change == 'true' }}
 
