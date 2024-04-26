@@ -126,7 +126,7 @@ jobs:
 
   add_release_candidate_version:
     name: Add release candidate version
-    runs-on: ubuntu_latest
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.add_rc_suffix.outputs.version }}
     needs:
