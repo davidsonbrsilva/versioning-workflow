@@ -15,7 +15,12 @@ repository_last_version=$(git tag --sort=committerdate | grep -v '^v' | tail -n 
 echo "Origin branch last version: $origin_branch_last_version"
 echo "Main branch last version: $repository_last_version"
 
+is_published=$(git branch --contains $repository_last_version | grep "main")
 last_version=$(echo -e "$origin_branch_last_version\n$repository_last_version" | sort -V | tail -n 1)
+
+if [[ -n "$is_published" ]]; then
+  last_version=$repository_last_version
+fi
 
 echo "Choosed version: $last_version"
 
