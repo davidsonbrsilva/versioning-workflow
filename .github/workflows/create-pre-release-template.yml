@@ -142,7 +142,18 @@ jobs:
         id: add_rc_suffix
         run: |
           version=${{ needs.generate_breaking_change_version.outputs.version || needs.generate_first_release_candidate_version.outputs.version }}
-          new_tag=$version-rc-1
+          regex="([0-9]+)\.([0-9]+)\.([0-9]+)-rc-([0-9]+)"
+          rc_version=1
+
+          if [[ "$version" =~ $regex ]]; then
+            version=$(git tag -l "$version*" | sort -V | tail -n 1)
+            if [[ $version =~ $regex ]]; then
+              rc_version="${BASH_REMATCH[4]}"
+              rc_version=(($rc_version + 1))
+            fi
+          fi
+
+          new_tag=$version-rc-${rc_version}
           echo "version=$new_tag" >> $GITHUB_OUTPUT
           echo "New generated version: $new_tag."
     if: |
