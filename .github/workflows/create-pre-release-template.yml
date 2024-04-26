@@ -36,7 +36,7 @@ jobs:
       - name: Check if new commit is major change
         id: check_major_change
         run: |
-          $commit_message=${{ github.event.head_commit.message }}
+          commit_message=${{ github.event.head_commit.message }}
           major_change_regex="(^FIRST RELEASE:.*$)|(^BREAKING CHANGE:.*$)|(^[^\s]+!:.*$)"
 
           if [[ "$commit_message" =~ $breaking_change_regex ]]; then
