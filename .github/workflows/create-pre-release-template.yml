@@ -30,6 +30,9 @@ jobs:
       is_major_change: ${{ steps.check_major_change.outputs.is_major_change }}
     needs: get_last_version
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Check if new commit is major change
         id: check_major_change
         run: |
