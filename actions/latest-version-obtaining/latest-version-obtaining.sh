@@ -12,17 +12,14 @@ git fetch --unshallow origin --tags > /dev/null 2>&1 || { echo "Failed to fetch 
 origin_branch_last_version=$(git tag --sort=committerdate --merged=$(git rev-parse "origin/$ORIGIN_BRANCH") | grep -v '^v' | tail -n 1)
 repository_last_version=$(git tag --sort=committerdate | grep -v '^v' | tail -n 1)
 
-echo "Origin branch last version: $origin_branch_last_version"
-echo "Main branch last version: $repository_last_version"
+echo "Last branch version: $origin_branch_last_version"
+echo "Last repository version: $repository_last_version"
 
-is_published=$(git branch -a --contains $repository_last_version | grep "main")
-
-echo "Was published: $is_published"
-
+is_published=$(git branch -a --contains $repository_last_version | grep "origin/main")
 last_version=$repository_last_version
 
 if [[ -z "$is_published" ]]; then
-  echo "The tag version was not published in production."
+  echo "The last repository version was not merged in 'main' yet."
   last_version=$(echo -e "$origin_branch_last_version\n$repository_last_version" | sort -V | tail -n 1)
 fi
 
