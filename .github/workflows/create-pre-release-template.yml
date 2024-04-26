@@ -42,7 +42,7 @@ jobs:
       - name: Check if new commit is major change
         id: check_major_change
         run: |
-          commit_message=${{ steps.get_commit_message.outputs.commit_message }}
+          commit_message='${{ steps.get_commit_message.outputs.commit_message }}'
           major_change_regex="(^FIRST RELEASE:.*$)|(^BREAKING CHANGE:.*$)|(^[^\s]+!:.*$)"
 
           if [[ "$commit_message" =~ $breaking_change_regex ]]; then
