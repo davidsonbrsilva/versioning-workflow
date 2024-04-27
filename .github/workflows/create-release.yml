@@ -10,7 +10,7 @@ jobs:
     uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-release-template.yml@v0
     permissions:
       contents: write
-  upsert_major_version:
+  upsert_major_version: # Optional
     name: Upsert major version
     needs: create_release
     permissions:
