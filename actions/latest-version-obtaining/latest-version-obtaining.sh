@@ -15,12 +15,19 @@ repository_last_version=$(git tag --sort=committerdate | grep -v '^v' | tail -n 
 echo "Last branch version: $origin_branch_last_version"
 echo "Last repository version: $repository_last_version"
 
-is_published=$(git branch -a --contains $repository_last_version | grep "origin/main")
-last_version=$repository_last_version
+is_origin_branch_version_published=$(git branch -a --contains $origin_branch_last_version | grep "origin/main")
+is_repository_version_published=$(git branch -a --contains $repository_last_version | grep "origin/main")
 
-if [[ -z "$is_published" ]]; then
-  echo "The last repository version was not merged in 'main' yet."
-  last_version=$(echo -e "$origin_branch_last_version\n$repository_last_version" | sort -V | tail -n 1)
+last_version=$(echo -e "$origin_branch_last_version\n$repository_last_version" | sort -V | tail -n 1)
+
+if [[ -n "$is_origin_branch_version_published" ]]; then
+  last_version=$origin_branch_last_version
+  echo "The branch version is already in 'main'."
+fi
+
+if [[ -n "$is_repository_version_published" ]]; then
+  last_version=$repository_last_version
+  echo "The repository version is already in 'main'."
 fi
 
 if [[ -z "$last_version" ]]; then
