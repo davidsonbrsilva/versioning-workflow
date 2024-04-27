@@ -2,6 +2,8 @@
 
 _Versioning Workflow_ é uma ferramenta que permite a geração automática de versões do seu código. Ele se baseia no conceito de [_trunk-based development_](https://trunkbaseddevelopment.com/) e utiliza [_conventional commits_](https://www.conventionalcommits.org/en/v1.0.0/) para determinar as versões. As versões geradas seguem o padrão de [versionamento semântico](https://www.conventionalcommits.org/en/v1.0.0/).
 
+[See in English](README.md)
+
 ## Sumário
 
 - [Versioning Workflow](#versioning-workflow)
