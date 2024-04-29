@@ -2,6 +2,16 @@ name: Release Template
 
 on:
   workflow_call:
+    inputs:
+      main_branch:
+        required: true
+        type: string
+      feature_branches:
+        required: false
+        type: string
+      hotfix_branches:
+        required: false
+        type: string
     outputs:
       version:
         description: The new generated version
@@ -38,6 +48,8 @@ jobs:
         with:
           commit_message: ${{ github.event.head_commit.message }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
+          feature_branches: ${{ inputs.feature_branches }}
+          hotfix_branches: ${{ inputs.hotfix_branches }}
     if: ${{ !needs.get_last_version.outputs.is_release_candidate }}
 
   remove_release_candidate_suffix:

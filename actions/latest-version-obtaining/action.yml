@@ -1,5 +1,9 @@
 name: "Latest Version Obtaining"
 description: "Get the last version in the repository"
+inputs:
+  main_branch:
+    description: "The main branch name"
+    required: false
 outputs:
   last_version:
     description: "The last version generated"
@@ -27,6 +31,7 @@ runs:
       shell: bash
       run: latest-version-obtaining.sh
       env:
+        MAIN_BRANCH: ${{ inputs.main_branch }}
         ORIGIN_BRANCH: ${{ github.head_ref || github.ref_name }}
 
     - name: Check if is release candidate

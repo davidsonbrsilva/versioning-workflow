@@ -2,6 +2,16 @@ name: Pre-release Template
 
 on:
   workflow_call:
+    inputs:
+      main_branch:
+        required: true
+        type: string
+      feature_branches:
+        required: false
+        type: string
+      hotfix_branches:
+        required: false
+        type: string
     outputs:
       version:
         description: The new generated version
@@ -22,6 +32,8 @@ jobs:
       - name: Get last version
         id: get_last_version
         uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@main
+        with:
+          main_branch: ${{ inputs.main_branch }}
 
   check_major_change:
     name: Check major change
@@ -72,6 +84,8 @@ jobs:
         with:
           commit_message: ${{ needs.check_major_change.outputs.commit_message }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
+          feature_branches: ${{ inputs.feature_branches }}
+          hotfix_branches: ${{ inputs.hotfix_branches }}
     if: ${{ needs.check_major_change.outputs.is_major_change == 'true' }}
 
   generate_first_release_candidate_version:
@@ -92,6 +106,8 @@ jobs:
           head_commit: ${{ github.event.pull_request.head.sha }}
           base_commit: ${{ github.event.pull_request.base.sha }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
+          feature_branches: ${{ inputs.feature_branches }}
+          hotfix_branches: ${{ inputs.hotfix_branches }}
     if: |
       always() && !failure() && !cancelled() &&
       !needs.check_major_change.outputs.is_major_change && !needs.get_last_version.outputs.is_release_candidate
