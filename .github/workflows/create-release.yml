@@ -8,6 +8,8 @@ jobs:
   create_release:
     name: Create release
     uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-release-template.yml@v0
+    with:
+      main_branch: "main"
     permissions:
       contents: write
   upsert_major_version: # Optional
