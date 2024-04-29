@@ -12,6 +12,7 @@ _Versioning Workflow_ is a tool that allows for automatic generation of versions
   - [Usage](#usage)
     - [Using the release workflow only](#using-the-release-workflow-only)
     - [Using the release workflow in combination with the pre-release workflow](#using-the-release-workflow-in-combination-with-the-pre-release-workflow)
+    - [Enabling workflow to handle with more than one branch names](#enabling-workflow-to-handle-with-more-than-one-branch-names)
   - [Contact](#contact)
   - [License](#license)
 
@@ -37,6 +38,8 @@ The pre-release workflow is triggered on pull request events: on opening, during
 
 > Automatic pre-release versions will not be generated if the source branch does not follow the mentioned patterns.
 
+### Enabling workflow to handle with more than one branch names
+
 You can use more than one feature and hotfix branch name to match your branches. For that, you need to separate them by white-spaces. For example:
 
 ```
@@ -46,8 +49,8 @@ jobs:
     uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@v0
     with:
       main_branch: "main"
-      feature_branches: "feat feature" # origin branches will match both 'feat' and 'feature' names
-      hotfix_branches: "fix hotfix" # origin branches will match both 'fix' and 'hotfix' names
+      feature_branches: "feat feature" # origin branch will match both 'feat' and 'feature' names
+      hotfix_branches: "fix hotfix" # origin branch will match both 'fix' and 'hotfix' names
 ```
 
 The `create_release` job accepts the optional `main_branch` parameter. In another side, the `create_release_candidate` job accepts the optional `main_branch`, `feature_branch` and `hotfix_branch` parameters. If no branch name is provided, the default values are used: `main` for main branch name, `feature` for feature branch names and `hotfix` for hotfix branch names.
