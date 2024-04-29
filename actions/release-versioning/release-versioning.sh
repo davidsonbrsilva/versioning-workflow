@@ -119,7 +119,7 @@ else
 fi
 
 for i in "${feature_branches[@]}"; do
-  if [[ "$i/"* == "$ORIGIN_BRANCH" ]]; then
+  if [[ "$ORIGIN_BRANCH" == "$i/"*  ]]; then
     is_feature_branch=true
     echo "$ORIGIN_BRANCH is a feature branch."
     break
@@ -127,7 +127,7 @@ for i in "${feature_branches[@]}"; do
 done
 
 for i in "${hotfix_branches[@]}"; do
-  if [[ "$i/"* == "$ORIGIN_BRANCH" ]]; then
+  if [[ "$ORIGIN_BRANCH" == "$i/"*  ]]; then
     is_hotfix_branch=true
     echo "$ORIGIN_BRANCH is a hotfix branch."
     break
