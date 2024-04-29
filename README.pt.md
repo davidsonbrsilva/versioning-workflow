@@ -33,9 +33,24 @@ _Commits_ que iniciam com `fix:` geram novas versões _patch_ do código (por ex
 
 ### Usar o workflow de criação de release em combinação com o de pré-release
 
-O workflow de criação de pré-release é disparado em eventos de _pull request_: na abertura, durante novos commits e na sua reabertura. Cada nova mudança em uma _pull request_ gerará uma versão _release candidate_ (`-rc-X`). As versões de _release candidate_ são incrementadas a cada nova alteração (por exemplo, de `0.1.0-rc-1` para `0.1.0-rc-2`). Novas versões de _release candidate_ (`-rc-1`) são geradas levando em consideração o nome da _branch_ de origem. Por exemplo, _branches_ que iniciam com `feature/` gerarão versões _minor_ do código. _Branches_ que iniciam com `hotfix/` gerarão versões _patch_ do código. Se houver algum _commit_ que comece com `BREAKING CHANGE:` ou `<algum_prefixo>!:`, versões _major_ serão geradas. Se houver _commits_ que iniciam com `FIRST RELEASE:` em versões não públicas do código (versão `0`), a versão inicial de lançamento do software será gerada (versão `1.0.0`).
+O workflow de criação de pré-release é disparado em eventos de _pull request_: na abertura, durante novos commits e na sua reabertura. Cada nova mudança em uma _pull request_ gerará uma versão _release candidate_ (`-rc-X`). As versões de _release candidate_ são incrementadas a cada nova alteração (por exemplo, de `0.1.0-rc-1` para `0.1.0-rc-2`). Novas versões de _release candidate_ (`-rc-1`) são geradas levando em consideração o nome das _branches_ de origem. Por exemplo, _branches_ que correspondem ao parâmetro `feature_branches` gerarão versões _minor_ do código. _Branches_ que correspondem ao parâmetro `hotfix_branches` gerarão versões _patch_ do código. Se houver algum _commit_ que comece com `BREAKING CHANGE:` ou `<algum_prefixo>!:`, versões _major_ serão geradas. Se houver _commits_ que iniciam com `FIRST RELEASE:` em versões não públicas do código (versão `0`), a versão inicial de lançamento do software será gerada (versão `1.0.0`).
 
-> Versões automáticas de _pre-release_ não serão geradas se a branch de origem não respeitar os padrões mencionados anteriormente. Lembre-se: _Versioning Workflow_ foi criado sobre a diretriz do _trunk-based-development_.
+> Versões automáticas de _pre-release_ não serão geradas se a branch de origem não seguir os padrões mencionados.
+
+Você pode usar mais de um nome de branch de de feature e hotfix para corresponder às suas branches. Para isso, você precisa separá-los por espaços em branco. Por exemplo:
+
+```
+jobs:
+  create_release_candidate:
+    name: Create release candidate
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@v0
+    with:
+      main_branch: "main"
+      feature_branches: "feat feature" # a branch de origem irá corresponder a ambos os nomes 'feat' e 'feature'
+      hotfix_branches: "fix hotfix" # a branch de origem irá corresponder a ambos os nomes 'fix' e 'hotfix'
+```
+
+O job `create_release` aceita o parâmetro opcional `main_branch`. Por outro lado, o job `create_release_candidate` aceita os parâmetros opcionals `main_branch`, `feature_branch` e `hotfix_branch`. Se nenhum nome de branch é fornecido, os valores padrões são usados: `main` para nome de branch principal, `feature` para nome de branches de feature e `hotfix` para nome de branches de hotfix.
 
 ## Contato
 
