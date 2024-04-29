@@ -34,7 +34,7 @@ jobs:
 
       - name: Get last version
         id: get_last_version
-        uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@v0
+        uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@feature/enabling-git-flow
         with:
           main_branch: ${{ inputs.main_branch }}
 
@@ -83,7 +83,7 @@ jobs:
 
       - name: Generate next release version
         id: generate_next_release
-        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@v0
+        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@feature/enabling-git-flow
         with:
           commit_message: ${{ needs.check_major_change.outputs.commit_message }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
@@ -104,7 +104,7 @@ jobs:
 
       - name: Generate next release version
         id: generate_next_release
-        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@v0
+        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@feature/enabling-git-flow
         with:
           origin_branch: ${{ github.head_ref }}
           head_commit: ${{ github.event.pull_request.head.sha }}
@@ -195,7 +195,7 @@ jobs:
 
       - name: Create release
         id: create_release
-        uses: davidsonbrsilva/versioning-workflow/actions/release-creation@v0
+        uses: davidsonbrsilva/versioning-workflow/actions/release-creation@feature/enabling-git-flow
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ needs.add_release_candidate_version.outputs.version || needs.increment_release_candidate_version.outputs.version }}

@@ -7,7 +7,7 @@ on:
 jobs:
   create_release:
     name: Create release
-    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-release-template.yml@v0
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-release-template.yml@feature/enabling-git-flow
     with:
       main_branch: "main"
     permissions:
@@ -17,6 +17,6 @@ jobs:
     needs: create_release
     permissions:
       contents: write
-    uses: davidsonbrsilva/versioning-workflow/.github/workflows/upsert-major-version-template.yml@v0
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/upsert-major-version-template.yml@feature/enabling-git-flow
     with:
       version: ${{ needs.create_release.outputs.version }}

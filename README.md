@@ -51,7 +51,7 @@ You can use more than one feature and hotfix branch name to match your branches.
 jobs:
   create_release_candidate:
     name: Create release candidate
-    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@v0
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@feature/enabling-git-flow
     with:
       main_branch: "main"
       feature_branches: "feat feature" # origin branch will match both 'feat' and 'feature' names
