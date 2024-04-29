@@ -1,8 +1,13 @@
 # Versioning Workflow
 
-_Versioning Workflow_ is a tool that allows for automatic generation of versions for your code. It is based on the concept of [_trunk-based development_](https://trunkbaseddevelopment.com/) and uses [_conventional commits_](https://www.conventionalcommits.org/en/v1.0.0/) to determine the versions. The generated versions follow the pattern of [semantic versioning](https://www.conventionalcommits.org/en/v1.0.0/).
+![GitHub Release](https://img.shields.io/github/v/release/davidsonbrsilva/versioning-workflow)
+![License](https://img.shields.io/github/license/davidsonbrsilva/versioning-workflow.svg)
+![Code Size](https://img.shields.io/github/languages/code-size/davidsonbrsilva/versioning-workflow)
+![Project Status](https://img.shields.io/badge/status-active-green.svg)
 
 [Ver em Português](README.pt.md)
+
+_Versioning Workflow_ is a tool that allows for automatic generation of versions for your code. It is based on the concept of [_trunk-based development_](https://trunkbaseddevelopment.com/) and uses [_conventional commits_](https://www.conventionalcommits.org/en/v1.0.0/) to determine the versions. The generated versions follow the pattern of [semantic versioning](https://www.conventionalcommits.org/en/v1.0.0/).
 
 ## Table of Contents
 
