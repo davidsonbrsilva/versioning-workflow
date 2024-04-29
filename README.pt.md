@@ -7,7 +7,7 @@
 
 [See in English](README.md)
 
-_Versioning Workflow_ é uma ferramenta que permite a geração automática de versões do seu código. Ele se baseia em [_conventional commits_](https://www.conventionalcommits.org/en/v1.0.0/) e padrões de branches para determinar as versões. As versões geradas seguem o [versionamento semântico](https://www.conventionalcommits.org/en/v1.0.0/).
+_Versioning Workflow_ é uma ferramenta que permite a geração automática de versões do seu código. Ele se baseia em [_conventional commits_](https://www.conventionalcommits.org/pt-br/v1.0.0/) e padrões de branches para determinar as versões. As versões geradas seguem o [versionamento semântico](https://semver.org/lang/pt-BR/).
 
 ## Sumário
 
