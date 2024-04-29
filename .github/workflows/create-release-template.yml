@@ -2,6 +2,10 @@ name: Release Template
 
 on:
   workflow_call:
+    inputs:
+      main_branch:
+        required: false
+        type: string
     outputs:
       version:
         description: The new generated version
@@ -20,7 +24,9 @@ jobs:
 
       - name: Get last version
         id: get_last_version
-        uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@main
+        uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@v0
+        with:
+          main_branch: ${{ inputs.main_branch }}
 
   generate_next_release_version:
     name: Generate next release version
@@ -34,7 +40,7 @@ jobs:
 
       - name: Generate next release version
         id: generate_next_release
-        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@main
+        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@v0
         with:
           commit_message: ${{ github.event.head_commit.message }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
@@ -83,7 +89,7 @@ jobs:
 
       - name: Create release
         id: create_release
-        uses: davidsonbrsilva/versioning-workflow/actions/release-creation@main
+        uses: davidsonbrsilva/versioning-workflow/actions/release-creation@v0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ needs.generate_next_release_version.outputs.version || needs.remove_release_candidate_suffix.outputs.version }}

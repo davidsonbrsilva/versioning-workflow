@@ -104,11 +104,41 @@ if [[ -z "$ORIGIN_BRANCH" ]]; then
   exit 1
 fi
 
+if [[ -z "$FEATURE_BRANCHES" ]]; then
+  feature_branches=("feature")
+  echo "Feature branch names not found. Using default value: feature."
+else
+  feature_branches=($FEATURE_BRANCHES)
+fi
+
+if [[ -z "$HOTFIX_BRANCHES" ]]; then
+  hotfix_branches=("hotfix")
+  echo "Hotfix branch names not found. Using default value: hotfix."
+else
+  hotfix_branches=($HOTFIX_BRANCHES)
+fi
+
+for i in "${feature_branches[@]}"; do
+  if [[ "$ORIGIN_BRANCH" == "$i/"*  ]]; then
+    is_feature_branch=true
+    echo "$ORIGIN_BRANCH is a feature branch."
+    break
+  fi
+done
+
+for i in "${hotfix_branches[@]}"; do
+  if [[ "$ORIGIN_BRANCH" == "$i/"*  ]]; then
+    is_hotfix_branch=true
+    echo "$ORIGIN_BRANCH is a hotfix branch."
+    break
+  fi
+done
+
 # Increment the version according to the branch prefix.
-if [[ $ORIGIN_BRANCH == "feature/"* ]]; then
+if [[ $is_feature_branch == true ]]; then
   minor_version=$((minor_version + 1))
   patch_version=0
-elif [[ $ORIGIN_BRANCH == "hotfix/"* ]]; then
+elif [[ $is_hotfix_branch == true ]]; then
   patch_version=$((patch_version + 1))
 else
   echo "Invalid branch to automatically generate version."
