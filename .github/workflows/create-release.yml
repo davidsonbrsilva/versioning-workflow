@@ -10,8 +10,6 @@ jobs:
     uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-release-template.yml@v0
     with:
       main_branch: "main"
-      feature_branches: "feature"
-      hotfix_branches: "hotfix"
     permissions:
       contents: write
   upsert_major_version: # Optional
