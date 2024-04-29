@@ -105,23 +105,24 @@ if [[ -z "$ORIGIN_BRANCH" ]]; then
 fi
 
 if [[ -z "$FEATURE_BRANCHES" ]]; then
-  $FEATURE_BRANCHES="feature"
+  feature_branches=("feature")
 fi
+
+feature_branches=($FEATURE_BRANCHES)
 
 if [[ -z "$HOTFIX_BRANCHES" ]]; then
-  $HOTFIX_BRANCHES="hotfix"
+  hotfix_branches=("hotfix")
 fi
 
-is_feature_branch=false
-is_hotfix_branch=false
+hotfix_branches=($HOTFIX_BRANCHES)
 
-for i in "${FEATURE_BRANCHES[@]}"; do
+for i in "${feature_branches[@]}"; do
   if [[ "$i/"* == "$ORIGIN_BRANCH" ]]; then
     is_feature_branch=true
   fi
 done
 
-for i in "${HOTFIX_BRANCHES[@]}"; do
+for i in "${hotfix_branches[@]}"; do
   if [[ "$i/"* == "$ORIGIN_BRANCH" ]]; then
     is_hotfix_branch=true
   fi
