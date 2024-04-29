@@ -12,6 +12,7 @@ jobs:
     with:
       main_branch: "main"
       feature_branches: "feature"
+      release_branches: "release"
       hotfix_branches: "hotfix"
     permissions:
       contents: write
