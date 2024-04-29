@@ -106,15 +106,17 @@ fi
 
 if [[ -z "$FEATURE_BRANCHES" ]]; then
   feature_branches=("feature")
+  echo "Feature branch names not found. Using default value: feature."
+else
+  feature_branches=($FEATURE_BRANCHES)
 fi
-
-feature_branches=($FEATURE_BRANCHES)
 
 if [[ -z "$HOTFIX_BRANCHES" ]]; then
   hotfix_branches=("hotfix")
+  echo "Hotfix branch names not found. Using default value: hotfix."
+else
+  hotfix_branches=($HOTFIX_BRANCHES)
 fi
-
-hotfix_branches=($HOTFIX_BRANCHES)
 
 for i in "${feature_branches[@]}"; do
   if [[ "$i/"* == "$ORIGIN_BRANCH" ]]; then
