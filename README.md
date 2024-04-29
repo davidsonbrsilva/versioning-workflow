@@ -29,13 +29,28 @@ There are two workflows available for you to use: the **release workflow** and t
 
 The release workflow is triggered whenever changes are detected directly on the main branch, through pull requests or direct commits. The new versions are generated based on the commit messages.
 
-Commits starting with `fix:` generate new patch versions of the code (e.g., from `0.1.0` to `0.1.1`). Commits starting with `BREAKING CHANGE:` or `<some_prefix>!:` (note the use of `!`) generate new major versions of the code (e.g., from `0.1.0` to `1.0.0`). Commits starting with `FIRST RELEASE:` in non-public versions of the code (version `0`) generate the initial release version of the software (version `1.0.0`). Commits in any other pattern generate minor versions of the code (e.g., from `0.1.0` to `0.2.$PLACEHOLDER$0`).
+Commits starting with `fix:` generate new patch versions of the code (e.g., from `0.1.0` to `0.1.1`). Commits starting with `BREAKING CHANGE:` or `<some_prefix>!:` (note the use of `!`) generate new major versions of the code (e.g., from `0.1.0` to `1.0.0`). Commits starting with `FIRST RELEASE:` in non-public versions of the code (version `0`) generate the initial release version of the software (version `1.0.0`). Commits in any other pattern generate minor versions of the code (e.g., from `0.1.0` to `0.2.0`).
 
 ### Using the release workflow in combination with the pre-release workflow
 
-The pre-release workflow is triggered on pull request events: on opening, during new commits, and on reopening. Each new change in a pull request will generate a release candidate version (`-rc-X`). The release candidate versions are incremented with each new change (e.g., from `0.1.0-rc-1` to `0.1.0-rc-2`). New release candidate versions (`-rc-1`) are generated taking into account the name of the source branch. For example, branches starting with `feature/` will generate minor versions of the code. Branches starting with `hotfix/` will generate patch versions of the code. If there is a commit that starts with `BREAKING CHANGE:` or `<some_prefix>!:`, major versions will be generated. If there are commits starting with `FIRST RELEASE:` in non-public versions of the code (version `0`), the initial release version of the software will be generated (version `1.0.0`).
+The pre-release workflow is triggered on pull request events: on opening, during new commits, and on reopening. Each new change in a pull request will generate a release candidate version (`-rc-X`). The release candidate versions are incremented with each new change (e.g., from `0.1.0-rc-1` to `0.1.0-rc-2`). New release candidate versions (`-rc-1`) are generated taking into account the name of the source branches. For example, branches that match with the `feature_branches` parameter will generate minor versions of the code. Branches that match with the `hotfix_branches` parameter will generate patch versions of the code. If there is a commit that starts with `BREAKING CHANGE:` or `<some_prefix>!:`, major versions will be generated. If there are commits starting with `FIRST RELEASE:` in non-public versions of the code (version `0`), the initial release version of the software will be generated (version `1.0.0`).
 
-> Automatic pre-release versions will not be generated if the source branch does not follow the mentioned patterns. Remember: Versioning Workflow was created based on the trunk-based development guideline.
+> Automatic pre-release versions will not be generated if the source branch does not follow the mentioned patterns.
+
+You can use more than one feature and hotfix branch name to match your branches. For that, you need to separate them by white-spaces. For example:
+
+```
+jobs:
+  create_release_candidate:
+    name: Create release candidate
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@v0
+    with:
+      main_branch: "main"
+      feature_branches: "feat feature" # origin branches will match both 'feat' and 'feature' names
+      hotfix_branches: "fix hotfix" # origin branches will match both 'fix' and 'hotfix' names
+```
+
+The `create_release` job accepts the optional `main_branch` parameter. In another side, the `create_release_candidate` job accepts the optional `main_branch`, `feature_branch` and `hotfix_branch` parameters. If no branch name is provided, the default values are used: `main` for main branch name, `feature` for feature branch names and `hotfix` for hotfix branch names.
 
 ## Contact
 
