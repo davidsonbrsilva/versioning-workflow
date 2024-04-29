@@ -11,7 +11,7 @@ jobs:
     uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@v0
     with:
       main_branch: "main"
-      feature_branches: "feat"
-      hotfix_branches: "fix"
+      feature_branches: "feature"
+      hotfix_branches: "hotfix"
     permissions:
       contents: write
