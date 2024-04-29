@@ -19,6 +19,9 @@ inputs:
   feature_branches:
     description: "Allowed feature branch names"
     required: false
+  release_branches:
+    description: "Allowed release branch names"
+    required: false
   hotfix_branches:
     description: "Allowed hotfix branch names"
     required: false
@@ -46,6 +49,7 @@ runs:
         COMMIT_MESSAGE: ${{ inputs.commit_message }}
         ORIGIN_BRANCH: ${{ inputs.origin_branch }}
         FEATURE_BRANCHES: ${{ inputs.feature_branches }}
+        RELEASE_BRANCHES: ${{ inputs.release_branches }}
         HOTFIX_BRANCHES: ${{ inputs.hotfix_branches }}
         HEAD_COMMIT: ${{ inputs.head_commit }}
         BASE_COMMIT: ${{ inputs.base_commit }}

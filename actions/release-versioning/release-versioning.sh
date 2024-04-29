@@ -111,6 +111,13 @@ else
   feature_branches=($FEATURE_BRANCHES)
 fi
 
+if [[ -z "$RELEASE_BRANCHES" ]]; then
+  release_branches=("release")
+  echo "Release branch names not found. Using default value: release."
+else
+  release_branches=($RELEASE_BRANCHES)
+fi
+
 if [[ -z "$HOTFIX_BRANCHES" ]]; then
   hotfix_branches=("hotfix")
   echo "Hotfix branch names not found. Using default value: hotfix."
@@ -126,6 +133,14 @@ for i in "${feature_branches[@]}"; do
   fi
 done
 
+for i in "${release_branches[@]}"; do
+  if [[ "$ORIGIN_BRANCH" == "$i/"*  ]]; then
+    is_release_branch=true
+    echo "$ORIGIN_BRANCH is a release branch."
+    break
+  fi
+done
+
 for i in "${hotfix_branches[@]}"; do
   if [[ "$ORIGIN_BRANCH" == "$i/"*  ]]; then
     is_hotfix_branch=true
@@ -135,7 +150,7 @@ for i in "${hotfix_branches[@]}"; do
 done
 
 # Increment the version according to the branch prefix.
-if [[ $is_feature_branch == true ]]; then
+if [[ $is_feature_branch == true || $is_release_branch == true ]]; then
   minor_version=$((minor_version + 1))
   patch_version=0
 elif [[ $is_hotfix_branch == true ]]; then

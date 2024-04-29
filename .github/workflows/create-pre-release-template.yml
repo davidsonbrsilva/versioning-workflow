@@ -9,6 +9,9 @@ on:
       feature_branches:
         required: false
         type: string
+      release_branches:
+        required: false
+        type: string
       hotfix_branches:
         required: false
         type: string
@@ -85,6 +88,7 @@ jobs:
           commit_message: ${{ needs.check_major_change.outputs.commit_message }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
           feature_branches: ${{ inputs.feature_branches }}
+          release_branches: ${{ inputs.release_branches }}
           hotfix_branches: ${{ inputs.hotfix_branches }}
     if: ${{ needs.check_major_change.outputs.is_major_change == 'true' }}
 
@@ -107,6 +111,7 @@ jobs:
           base_commit: ${{ github.event.pull_request.base.sha }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
           feature_branches: ${{ inputs.feature_branches }}
+          release_branches: ${{ inputs.release_branches }}
           hotfix_branches: ${{ inputs.hotfix_branches }}
     if: |
       always() && !failure() && !cancelled() &&
