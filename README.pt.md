@@ -44,7 +44,7 @@ on:
 jobs:
   create_release:
     name: Create release
-    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-release-template.yml@v0
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-release-template.yml@v1
     permissions:
       contents: write
 ```
@@ -70,7 +70,7 @@ on:
 jobs:
   create_release:
     name: Create release
-    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-release-template.yml@v0
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-release-template.yml@v1
     permissions:
       contents: write
     with:
@@ -87,7 +87,7 @@ upsert_major_version: # Optional
     needs: create_release
     permissions:
       contents: write
-    uses: davidsonbrsilva/versioning-workflow/.github/workflows/upsert-major-version-template.yml@v0
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/upsert-major-version-template.yml@v1
     with:
       version: ${{ needs.create_release.outputs.version }}
 ```
@@ -107,7 +107,7 @@ on:
 jobs:
   create_release_candidate:
     name: Create release candidate
-    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@v0
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@v1
     permissions:
       contents: write
 ```
@@ -142,7 +142,7 @@ on:
 jobs:
   create_release_candidate:
     name: Create release candidate
-    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@v0
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@v1
     permissions:
       contents: write
     with:
@@ -160,7 +160,7 @@ Por fim, você também pode usar mais de um nome de branch para os parâmetros `
 jobs:
   create_release_candidate:
     name: Create release candidate
-    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@v0
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@v1
     with:
       feature_branches: "feat feature" # aceitará correspondência da branch de origem tanto para 'feat' quanto para 'feature'
       release_branches: "rel release" # aceitará correspondência da branch de origem tanto para 'rel' quanto para 'release'
