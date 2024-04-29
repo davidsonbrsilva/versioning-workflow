@@ -25,8 +25,10 @@ is_repository_version_published=$(git branch -a --contains $repository_last_vers
 last_version=$(echo -e "$origin_branch_last_version\n$repository_last_version" | sort -V | tail -n 1)
 
 if [[ -n "$is_origin_branch_version_published" ]]; then
-  last_version=$origin_branch_last_version
-  echo "The branch version is already in '$MAIN_BRANCH'."
+  if [[ $ORIGIN_BRANCH != $MAIN_BRANCH ]]; then
+    last_version=$origin_branch_last_version
+    echo "The branch version is already in '$MAIN_BRANCH'."
+  fi
 fi
 
 if [[ -n "$is_repository_version_published" ]]; then
