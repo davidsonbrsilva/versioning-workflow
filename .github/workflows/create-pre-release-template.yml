@@ -183,11 +183,17 @@ jobs:
           version=$(git tag -l "$version*" | sort -V | tail -n 1)
           printf "Last version: %s\n" "$version"
           if [[ $version =~ $regex ]]; then
+            major_version="${BASH_REMATCH[1]}"
+            minor_version="${BASH_REMATCH[2]}"
+            patch_version="${BASH_REMATCH[3]}"
             rc_version="${BASH_REMATCH[4]}"
             rc_version=$((rc_version + 1))
+
+            new_tag=${major_version}.${minor_version}.${patch_version}-rc-${rc_version}
+          else
+            new_tag=$version-rc-1
           fi
 
-          new_tag=$version-rc-${rc_version}
           echo "version=$new_tag" >> $GITHUB_OUTPUT
           echo "New generated version: $new_tag."
     if: |
