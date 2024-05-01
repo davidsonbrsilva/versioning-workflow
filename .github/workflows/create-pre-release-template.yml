@@ -136,8 +136,8 @@ jobs:
       - name: Add release candidate suffix
         id: add_rc_suffix
         uses: davidsonbrsilva/versioning-workflow/actions/release-candidate-suffix-adding@feature/applying-code-cleanup
-        env:
-          VERSION: ${{ needs.generate_breaking_change_version.outputs.version || needs.generate_first_release_candidate_version.outputs.version }}
+        with:
+          version: ${{ needs.generate_breaking_change_version.outputs.version || needs.generate_first_release_candidate_version.outputs.version }}
     if: |
       always() && !failure() && !cancelled()
 
