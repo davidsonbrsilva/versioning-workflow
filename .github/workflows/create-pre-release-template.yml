@@ -139,8 +139,7 @@ jobs:
         env:
           VERSION: ${{ needs.generate_breaking_change_version.outputs.version || needs.generate_first_release_candidate_version.outputs.version }}
     if: |
-      always() && !failure() && !cancelled() &&
-      needs.check_major_change.outputs.is_major_change
+      always() && !failure() && !cancelled()
 
   create_release:
     name: Create release candidate
