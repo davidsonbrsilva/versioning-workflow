@@ -137,7 +137,10 @@ jobs:
         id: add_rc_suffix
         uses: davidsonbrsilva/versioning-workflow/actions/release-candidate-suffix-adding@feature/applying-code-cleanup
         with:
-          version: ${{ needs.generate_breaking_change_version.outputs.version || needs.generate_first_release_candidate_version.outputs.version }}
+          version: |
+            needs.generate_breaking_change_version.outputs.version || 
+            needs.generate_first_release_candidate_version.outputs.version
+            needs.get_last_version.outputs.last_version
     if: |
       always() && !failure() && !cancelled()
 
