@@ -1,46 +1,72 @@
 #!/bin/bash
 
-if [[ -z "$ORIGIN_BRANCH" ]]; then
-  echo "'ORIGIN_BRANCH' is required."
+readonly ORIGIN_BRANCH
+readonly MAIN_BRANCH
+
+is_missing() {
+  [[ -z "${1}" ]]
+}
+
+fail_to_fetch() {
+  printf "Failed to fetch tags from remote.\n"
   exit 1
-fi
+}
 
-if [[ -z "$MAIN_BRANCH" ]]; then
-  $MAIN_BRANCH="main"
-fi
+fetch_tags_from_remote() {
+  git fetch --unshallow origin --tags > /dev/null 2>&1 || fail_to_fetch
+}
 
-# Fetch tags from remote.
-git fetch --unshallow origin --tags > /dev/null 2>&1 || { echo "Failed to fetch tags from remote."; exit 1; }
+get_last_origin_branch_version() {
+  git tag --sort=committerdate --merged=$(git rev-parse "origin/${1}") | grep -v '^v' | tail --lines 1
+}
 
-# Get the last repository tag.
-origin_branch_last_version=$(git tag --sort=committerdate --merged=$(git rev-parse "origin/$ORIGIN_BRANCH") | grep -v '^v' | tail -n 1)
-repository_last_version=$(git tag --sort=committerdate | grep -v '^v' | tail -n 1)
+get_last_repository_version() {
+  git tag --sort=committerdate | grep -v '^v' | tail --lines 1
+}
 
-echo "Last branch version: $origin_branch_last_version"
-echo "Last repository version: $repository_last_version"
+is_version_published() {
+  result=$(git branch --all --contains "${1}" | grep "origin/${2}")
+  [[ -n "${result}" ]]
+}
 
-is_origin_branch_version_published=$(git branch -a --contains $origin_branch_last_version | grep "origin/$MAIN_BRANCH")
-is_repository_version_published=$(git branch -a --contains $repository_last_version | grep "origin/$MAIN_BRANCH")
+get_newest_version_between() {
+  printf "%s\n%s\n" "${1}" "${2}" | sort --version-sort | tail --lines 1
+}
 
-last_version=$(echo -e "$origin_branch_last_version\n$repository_last_version" | sort -V | tail -n 1)
+get_last_version() {
+  local origin_branch="${1}"
+  local main_branch="${2}"
 
-if [[ -n "$is_origin_branch_version_published" ]]; then
-  if [[ $ORIGIN_BRANCH != $MAIN_BRANCH ]]; then
-    last_version=$origin_branch_last_version
-    echo "The branch version is already in '$MAIN_BRANCH'."
+  if is_missing "${origin_branch}"; then
+    printf "Origin branch is required.\n"
+    exit 1
   fi
-fi
 
-if [[ -n "$is_repository_version_published" ]]; then
-  last_version=$repository_last_version
-  echo "The repository version is already in '$MAIN_BRANCH'."
-fi
+  if is_missing "${main_branch}"; then
+    main_branch="main"
+  fi
 
-if [[ -z "$last_version" ]]; then
-  echo "No found version associated with this branch."
+  local origin_branch_last_version=$(get_last_origin_branch_version "${origin_branch}")
+  local repository_last_version=$(get_last_repository_version)
+
+  printf "Last branch version: ${origin_branch_last_version}\n"
+  printf "Last repository version: ${repository_last_version}\n"
+
+  local version=$(get_newest_version_between "${origin_branch_last_version}" "${repository_last_version}")
+
+  if is_version_published "${origin_branch_last_version}" "${main_branch}"; then
+    version="${origin_branch_last_version}"
+    printf "The origin branch version is already in '%s'.\n" "${main_branch}"
+  fi
+
+  if is_missing "${version}"; then
+    printf "No found version associated with this branch.\n"
+    exit 0
+  fi
+
+  printf "last_version=%s\n" "${version}" >> "${GITHUB_OUTPUT}"
+  printf "Choosen version: %s.\n" "${version}"
   exit 0
-fi
+}
 
-echo "last_version=$last_version" >> $GITHUB_OUTPUT
-echo "Choosen version: $last_version"
-exit 0
+get_last_version "${ORIGIN_BRANCH}" "${MAIN_BRANCH}"
