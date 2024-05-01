@@ -1,5 +1,9 @@
 readonly VERSION
 
+is_missing() {
+  [[ -z "${1}" ]]
+}
+
 is_release_candidate() {
   [[ "${1}" =~ ([0-9]+)\.([0-9]+)\.([0-9]+)-rc-([0-9]+) ]]
 }
@@ -20,7 +24,11 @@ get_last_among_release_candidates() {
 add_release_candidate_suffix() {
   fetch_tags_from_remote
 
-  local version=$(get_last_among_release_candidates "${1}" || printf "%s" "${1}")
+  local version=$(get_last_among_release_candidates "${1}")
+
+  if is_missing "${version}"; then
+    version="${1}"
+  fi
 
   local new_tag="${version}-rc-1"
 
