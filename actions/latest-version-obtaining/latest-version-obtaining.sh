@@ -58,7 +58,12 @@ get_last_version() {
 
   if is_version_published "${last_origin_branch_version}" "${main_branch}"; then
     version="${last_origin_branch_version}"
-    printf "The origin branch version is already in '%s'.\n" "${main_branch}"
+    printf "The origin branch version is in '%s'.\n" "${main_branch}"
+  fi
+
+  if is_version_published "${last_repository_version}" "${main_branch}"; then
+    version="${last_repository_version}"
+    printf "The repository version is in '%s'.\n" "${main_branch}"
   fi
 
   if is_missing "${version}"; then
