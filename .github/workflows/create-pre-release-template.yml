@@ -166,13 +166,11 @@ jobs:
           regex="([0-9]+)\.([0-9]+)\.([0-9]+)-rc-([0-9]+)"
           rc_version=1
 
-          if [[ "$version" =~ $regex ]]; then
-            version=$(git tag -l "$version*" | sort -V | tail -n 1)
-            printf "Last version: %s\n" "$version"
-            if [[ $version =~ $regex ]]; then
-              rc_version="${BASH_REMATCH[4]}"
-              rc_version=$((rc_version + 1))
-            fi
+          version=$(git tag -l "$version*" | sort -V | tail -n 1)
+          printf "Last version: %s\n" "$version"
+          if [[ $version =~ $regex ]]; then
+            rc_version="${BASH_REMATCH[4]}"
+            rc_version=$((rc_version + 1))
           fi
 
           new_tag=$version-rc-${rc_version}
