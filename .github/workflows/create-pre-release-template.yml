@@ -139,7 +139,7 @@ jobs:
         with:
           version: |
             needs.generate_breaking_change_version.outputs.version || 
-            needs.generate_first_release_candidate_version.outputs.version
+            needs.generate_first_release_candidate_version.outputs.version || 
             needs.get_last_version.outputs.last_version
     if: |
       always() && !failure() && !cancelled()
