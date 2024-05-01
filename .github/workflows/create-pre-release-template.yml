@@ -117,37 +117,8 @@ jobs:
       always() && !failure() && !cancelled() &&
       !needs.check_major_change.outputs.is_major_change && !needs.get_last_version.outputs.is_release_candidate
 
-  increment_release_candidate_version:
-    name: Increment release candidate version
-    runs-on: ubuntu-latest
-    needs: get_last_version
-    outputs:
-      version: ${{ steps.increment_rc_suffix.outputs.version }}
-    steps:
-      - name: Increment release candidate suffix
-        id: increment_rc_suffix
-        run: |
-          regex="([0-9]+)\.([0-9]+)\.([0-9]+)-rc-([0-9]+)"
-
-          if [[ ${{ needs.get_last_version.outputs.last_version }} =~ $regex ]]; then
-            major_version="${BASH_REMATCH[1]}"
-            minor_version="${BASH_REMATCH[2]}"
-            patch_version="${BASH_REMATCH[3]}"
-            rc_version="${BASH_REMATCH[4]}"
-
-            rc_version=$((rc_version + 1))
-            new_tag=${major_version}.${minor_version}.${patch_version}-rc-${rc_version}
-            echo "version=$new_tag" >> $GITHUB_OUTPUT
-            echo "New generated version: $new_tag."
-            exit 0
-          fi
-
-          echo "The version ${{ needs.get_last_version.outputs.last_version }} does not match a valid release candidate version."
-          exit 1
-    if: ${{ needs.get_last_version.outputs.is_release_candidate == 'true' }}
-
-  add_release_candidate_version:
-    name: Add release candidate version
+  add_release_candidate_suffix:
+    name: Add release candidate suffix
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.add_rc_suffix.outputs.version }}
@@ -169,12 +140,12 @@ jobs:
           VERSION: ${{ needs.generate_breaking_change_version.outputs.version || needs.generate_first_release_candidate_version.outputs.version }}
     if: |
       always() && !failure() && !cancelled() &&
-      needs.check_major_change.outputs.is_major_change || !needs.get_last_version.outputs.is_release_candidate
+      needs.check_major_change.outputs.is_major_change
 
   create_release:
     name: Create release candidate
     runs-on: ubuntu-latest
-    needs: [add_release_candidate_version, increment_release_candidate_version]
+    needs: [add_release_candidate_suffix]
     permissions:
       contents: write
     outputs:
@@ -188,7 +159,7 @@ jobs:
         uses: davidsonbrsilva/versioning-workflow/actions/release-creation@feature/applying-code-cleanup
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          version: ${{ needs.add_release_candidate_version.outputs.version || needs.increment_release_candidate_version.outputs.version }}
+          version: ${{ needs.add_release_candidate_suffix.outputs.version }}
           target_commit: ${{ github.event.pull_request.head.sha }}
           pre_release: true
     if: always() && !failure() && !cancelled()
