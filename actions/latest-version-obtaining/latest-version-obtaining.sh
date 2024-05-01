@@ -46,6 +46,8 @@ get_last_version() {
     main_branch="main"
   fi
 
+  fetch_tags_from_remote
+
   local origin_branch_last_version=$(get_last_origin_branch_version "${origin_branch}")
   local repository_last_version=$(get_last_repository_version)
 
