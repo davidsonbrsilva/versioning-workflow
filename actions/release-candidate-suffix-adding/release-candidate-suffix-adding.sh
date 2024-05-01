@@ -20,7 +20,7 @@ get_last_among_release_candidates() {
 add_release_candidate_suffix() {
   fetch_tags_from_remote
 
-  version=$(get_last_among_release_candidates "${1}")
+  local version=$(get_last_among_release_candidates "${1}" || printf "%s" "${1}")
 
   local new_tag="${version}-rc-1"
 
