@@ -46,17 +46,24 @@ get_last_version() {
     main_branch="main"
   fi
 
-  local origin_branch_last_version=$(get_last_origin_branch_version "${origin_branch}")
-  local repository_last_version=$(get_last_repository_version)
+  fetch_tags_from_remote
 
-  printf "Last branch version: ${origin_branch_last_version}\n"
-  printf "Last repository version: ${repository_last_version}\n"
+  local last_origin_branch_version=$(get_last_origin_branch_version "${origin_branch}")
+  local last_repository_version=$(get_last_repository_version)
 
-  local version=$(get_newest_version_between "${origin_branch_last_version}" "${repository_last_version}")
+  printf "Last branch version: ${last_origin_branch_version}\n"
+  printf "Last repository version: ${last_repository_version}\n"
 
-  if is_version_published "${origin_branch_last_version}" "${main_branch}"; then
-    version="${origin_branch_last_version}"
-    printf "The origin branch version is already in '%s'.\n" "${main_branch}"
+  local version=$(get_newest_version_between "${last_origin_branch_version}" "${last_repository_version}")
+
+  if is_version_published "${last_origin_branch_version}" "${main_branch}"; then
+    version="${last_origin_branch_version}"
+    printf "The origin branch version is in '%s'.\n" "${main_branch}"
+  fi
+
+  if is_version_published "${last_repository_version}" "${main_branch}"; then
+    version="${last_repository_version}"
+    printf "The repository version is in '%s'.\n" "${main_branch}"
   fi
 
   if is_missing "${version}"; then
