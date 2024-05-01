@@ -1,0 +1,28 @@
+name: "Release Candidate Suffix Adding"
+description: "Add a release candidate suffix to the received version"
+inputs:
+  version:
+    description: "The input version"
+    required: true
+outputs:
+  version:
+    description: "The release candidate version"
+    value: ${{ steps.add_release_candidate_suffix.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set GitHub path
+      run: echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
+      shell: bash
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+
+    - name: Add release candidate suffix
+      id: add_release_candidate_suffix
+      shell: bash
+      run: release-candidate-suffix-adding.sh
+      env:
+        VERSION: ${{ inputs.version }}

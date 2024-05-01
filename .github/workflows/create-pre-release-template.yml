@@ -164,38 +164,9 @@ jobs:
 
       - name: Add release candidate suffix
         id: add_rc_suffix
-        run: |
-          version=${{ needs.generate_breaking_change_version.outputs.version || needs.generate_first_release_candidate_version.outputs.version }}
-          regex="([0-9]+)\.([0-9]+)\.([0-9]+)-rc-([0-9]+)"
-          rc_version=1
-
-          fail_to_fetch() {
-            printf "Failed to fetch tags from remote.\n"
-            exit 1
-          }
-
-          fetch_tags_from_remote() {
-            git fetch --unshallow origin --tags > /dev/null 2>&1 || fail_to_fetch
-          }
-
-          fetch_tags_from_remote
-
-          version=$(git tag -l "$version*" | sort -V | tail -n 1)
-          printf "Last version: %s\n" "$version"
-          if [[ $version =~ $regex ]]; then
-            major_version="${BASH_REMATCH[1]}"
-            minor_version="${BASH_REMATCH[2]}"
-            patch_version="${BASH_REMATCH[3]}"
-            rc_version="${BASH_REMATCH[4]}"
-            rc_version=$((rc_version + 1))
-
-            new_tag=${major_version}.${minor_version}.${patch_version}-rc-${rc_version}
-          else
-            new_tag=$version-rc-1
-          fi
-
-          echo "version=$new_tag" >> $GITHUB_OUTPUT
-          echo "New generated version: $new_tag."
+        uses: davidsonbrsilva/versioning-workflow/actions/release-candidate-suffix-adding@feature/applying-code-cleanup
+        env:
+          VERSION: ${{ needs.generate_breaking_change_version.outputs.version || needs.generate_first_release_candidate_version.outputs.version }}
     if: |
       always() && !failure() && !cancelled() &&
       needs.check_major_change.outputs.is_major_change || !needs.get_last_version.outputs.is_release_candidate
