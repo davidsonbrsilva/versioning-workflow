@@ -159,6 +159,9 @@ jobs:
         generate_first_release_candidate_version,
       ]
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Add release candidate suffix
         id: add_rc_suffix
         run: |
