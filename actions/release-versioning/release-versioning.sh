@@ -18,11 +18,13 @@ is_valid_version() {
 }
 
 is_breaking_change() {
-  [[ "${1}" =~ ^BREAKING CHANGE:.*$|^.*[^[:space:]]+!:.*$ ]]
+  local regex='^BREAKING CHANGE:.*$|^.*[^[:space:]]+!:.*$'
+  [[ "${1}" =~ $regex ]]
 }
 
 is_first_release() {
-  [[ "${1}" =~ ^FIRST RELEASE:.*$ ]]
+  local regex='^FIRST RELEASE:.*'
+  [[ "${1}" =~ $regex ]]
 }
 
 is_non_public_version() {
