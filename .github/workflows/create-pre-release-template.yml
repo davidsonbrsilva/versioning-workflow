@@ -43,7 +43,7 @@ jobs:
 
       - name: Get last version
         id: get_last_version
-        uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@v1
+        uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@feature/adding-parametrizable-properties
         with:
           main_branch: ${{ inputs.main_branch }}
 
@@ -92,7 +92,7 @@ jobs:
 
       - name: Generate next release version
         id: generate_next_release
-        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@v1
+        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@feature/adding-parametrizable-properties
         with:
           commit_message: ${{ needs.check_major_change.outputs.commit_message }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
@@ -113,7 +113,7 @@ jobs:
 
       - name: Generate next release version
         id: generate_next_release
-        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@v1
+        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@feature/adding-parametrizable-properties
         with:
           origin_branch: ${{ github.head_ref }}
           head_commit: ${{ github.event.pull_request.head.sha }}
@@ -164,10 +164,13 @@ jobs:
 
       - name: Create release
         id: create_release
-        uses: davidsonbrsilva/versioning-workflow/actions/release-creation@v1
+        uses: davidsonbrsilva/versioning-workflow/actions/release-creation@feature/adding-parametrizable-properties
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ needs.add_release_candidate_suffix.outputs.version }}
           target_commit: ${{ github.event.pull_request.head.sha }}
           pre_release: true
+          use_v_prefix: ${{ inputs.use_v_prefix }}
+          release_name: ${{ inputs.release_name }}
+          release_name_prefix: ${{ inputs.release_name_prefix }}
     if: always() && !failure() && !cancelled()
