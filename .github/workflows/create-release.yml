@@ -10,6 +10,9 @@ jobs:
     uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-release-template.yml@v1
     with:
       main_branch: "main"
+      use_v_prefix: false
+      release_name:
+      release_name_prefix:
     permissions:
       contents: write
   upsert_major_version: # Optional

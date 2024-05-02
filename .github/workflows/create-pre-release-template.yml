@@ -15,6 +15,15 @@ on:
       hotfix_branches:
         required: false
         type: string
+      use_v_prefix:
+        required: false
+        type: boolean
+      release_name:
+        required: false
+        type: string
+      release_name_prefix:
+        required: false
+        type: string
     outputs:
       version:
         description: The new generated version
@@ -135,7 +144,7 @@ jobs:
 
       - name: Add release candidate suffix
         id: add_rc_suffix
-        uses: davidsonbrsilva/versioning-workflow/actions/release-candidate-suffix-adding@feature/applying-code-cleanup
+        uses: davidsonbrsilva/versioning-workflow/actions/release-candidate-suffix-adding@v1
         with:
           version: ${{ needs.generate_breaking_change_version.outputs.version || needs.generate_first_release_candidate_version.outputs.version || needs.get_last_version.outputs.last_version}}
     if: |
@@ -161,4 +170,7 @@ jobs:
           version: ${{ needs.add_release_candidate_suffix.outputs.version }}
           target_commit: ${{ github.event.pull_request.head.sha }}
           pre_release: true
+          use_v_prefix: ${{ inputs.use_v_prefix }}
+          release_name: ${{ inputs.release_name }}
+          release_name_prefix: ${{ inputs.release_name_prefix }}
     if: always() && !failure() && !cancelled()
