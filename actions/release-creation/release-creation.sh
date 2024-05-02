@@ -4,11 +4,17 @@ readonly GITHUB_REPOSITORY
 readonly GITHUB_TOKEN
 readonly VERSION
 readonly TARGET_COMMIT
-readonly RELEASE_NAME
 readonly PRE_RELEASE
+readonly USE_V_PREFIX
+readonly RELEASE_NAME
+readonly RELEASE_NAME_PREFIX
 
 is_missing() {
   [[ -z "${1}" ]]
+}
+
+is_to_use_v_prefix() {
+  [[ "${1}" == "true" ]]
 }
 
 is_pre_release() {
@@ -16,29 +22,29 @@ is_pre_release() {
 }
 
 is_release_created() {
-  [ "${1}" -eq "201" ]
+  [[ "${1}" -eq "201" ]]
 }
 
 check_required_parameters() {
   local missing_parameter=false
 
   if is_missing "${GITHUB_REPOSITORY}"; then
-    printf "'GITHUB_REPOSITORY' is required."
+    printf "'GITHUB_REPOSITORY' is required.\n"
     missing_parameter=true
   fi
 
   if is_missing "${GITHUB_TOKEN}"; then
-    printf "'GITHUB_TOKEN' is required."
+    printf "'GITHUB_TOKEN' is required.\n"
     missing_parameter=true
   fi
 
   if is_missing "${VERSION}"; then
-    printf "'VERSION' is required."
+    printf "'VERSION' is required.\n"
     missing_parameter=true
   fi
 
   if is_missing "${TARGET_COMMIT}"; then
-    printf "'TARGET_COMMIT' is required."
+    printf "'TARGET_COMMIT' is required.\n"
     missing_parameter=true
   fi
 
@@ -50,10 +56,20 @@ check_required_parameters() {
 create_release() {
   check_required_parameters
 
+  local version="${VERSION}"
+
+  if is_to_use_v_prefix "${USE_V_PREFIX}"; then
+    version="v${VERSION}"
+  fi
+
   local release_name="${RELEASE_NAME}"
 
   if is_missing "${RELEASE_NAME}"; then
-    release_name="${VERSION}"
+    release_name="${version}"
+  fi
+
+  if ! is_missing "${RELEASE_NAME_PREFIX}"; then
+    release_name="${RELEASE_NAME_PREFIX} ${release_name}"
   fi
 
   local pre_release="${PRE_RELEASE}"
@@ -70,7 +86,7 @@ create_release() {
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
     -H "Content-Type: application/json" \
     -d "{
-      \"tag_name\": \"${VERSION}\",
+      \"tag_name\": \"${version}\",
       \"target_commitish\": \"${TARGET_COMMIT}\",
       \"name\": \"${release_name}\",
       \"draft\": false,
@@ -80,12 +96,13 @@ create_release() {
     ${url})
 
   if is_release_created "${response_code}"; then
-    printf "version=%s" "${VERSION}" >> "${GITHUB_OUTPUT}"
-    printf "New generated release: %s\n" "${VERSION}"
+    printf "version=%s" "${version}" >> "${GITHUB_OUTPUT}"
+    printf "New generated release: %s\n" "${release_name}"
+    printf "Version: %s\n" "${version}"
     exit 0
   fi
 
-  printf "Failed to generate release."
+  printf "Failed to generate release.\n"
   exit 1
 }
 

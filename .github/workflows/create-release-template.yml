@@ -6,6 +6,15 @@ on:
       main_branch:
         required: false
         type: string
+      use_v_prefix:
+        required: false
+        type: boolean
+      release_name:
+        required: false
+        type: string
+      release_name_prefix:
+        required: false
+        type: string
     outputs:
       version:
         description: The new generated version
@@ -94,6 +103,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ needs.generate_next_release_version.outputs.version || needs.remove_release_candidate_suffix.outputs.version }}
           target_commit: ${{ github.event.head_commit.id }}
+          use_v_prefix: ${{ inputs.use_v_prefix }}
+          release_name: ${{ inputs.release_name }}
+          release_name_prefix: ${{ inputs.release_name_prefix }}
     if: |
       always() &&
       ((needs.generate_next_release_version.result == 'success' && needs.remove_release_candidate_suffix.result == 'skipped') ||
