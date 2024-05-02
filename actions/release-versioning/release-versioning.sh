@@ -1,166 +1,236 @@
 #!/bin/bash
 
-# If there is no tag in the repository, creates the first one.
-if [ -z "$LAST_VERSION" ]; then
-  new_tag="0.1.0"
-  echo "There is no version associated with this program yet."
-  echo "version=$new_tag" >> $GITHUB_OUTPUT
-  echo "New generated version: $new_tag."
-  exit 0
-fi
+readonly LAST_VERSION
+readonly HEAD_COMMIT
+readonly BASE_COMMIT
+readonly ORIGIN_BRANCH
+readonly FEATURE_BRANCHES
+readonly RELEASE_BRANCHES
+readonly HOTFIX_BRANCHES
+readonly COMMIT_MESSAGE
 
-echo "Last stable version: $LAST_VERSION."
+is_missing() {
+  [[ -z "${1}" ]]
+}
 
-# Slice the version into major, minor and patch parts.
-regex="([0-9]+)\.([0-9]+)\.([0-9]+)"
+is_valid_version() {
+  [[ "${1}" =~ ([0-9]+)\.([0-9]+)\.([0-9]+) ]]
+}
 
-if [[ $LAST_VERSION =~ $regex ]]; then
-  major_version="${BASH_REMATCH[1]}"
-  minor_version="${BASH_REMATCH[2]}"
-  patch_version="${BASH_REMATCH[3]}"
-else
-  echo "The last found version does not match a valid semantic versioning pattern."
-  exit 1
-fi
+is_breaking_change() {
+  local regex='^BREAKING CHANGE:.*$|^.*[^[:space:]]+!:.*$'
+  [[ "${1}" =~ $regex ]]
+}
 
-# Check if the required parameters were informed.
-if [[ -z "$HEAD_COMMIT" ]]; then
-    missing_parameter=true
-fi
+is_first_release() {
+  local regex='^FIRST RELEASE:.*'
+  [[ "${1}" =~ $regex ]]
+}
 
-if [[ -z "$BASE_COMMIT" ]]; then
-    missing_parameter=true
-fi
+is_non_public_version() {
+  [[ "${1}" -eq 0 ]]
+}
 
-if [ "$missing_parameter" == true ]; then
-  if [[ -z "$COMMIT_MESSAGE" ]]; then
-    echo "You need to inform 'HEAD_COMMIT' and 'BASE_COMMIT' or inform 'COMMIT_MESSAGE' to proceed."
-    exit 1
-  fi
+is_fix() {
+  [[ "${1}" == 'fix:'* ]]
+}
 
-  # Check if the commit message is breaking change.
-  breaking_change_regex="^BREAKING CHANGE:.*$|^.*[^[:space:]]+!:.*$"
+is_minor_change() {
+  [[ $(is_in_branches_list "${2[@]}" "${1}") || $(is_in_branches_list "${3[@]}" "${1}") ]]
+}
 
-  if [[ $COMMIT_MESSAGE =~ $breaking_change_regex ]]; then
+contains() {
+  [[ "${1}" == "${2}/"*  ]]
+}
+
+check_commit_for_breaking_change() {
+  if is_breaking_change "${1}"; then
+    local major_version="${2}"
     major_version=$((major_version + 1))
-    new_tag="${major_version}.0.0"
-    echo "A breaking change was identified."
-    echo "version=$new_tag" >> $GITHUB_OUTPUT
-    echo "New generated version: $new_tag."
+
+    local new_tag="${major_version}.0.0"
+
+    printf "A breaking change was identified.\n"
+    printf "version=%s" "${new_tag}" >> "${GITHUB_OUTPUT}"
+    printf "New generated version: %s.\n" "${new_tag}"
     exit 0
   fi
+}
 
-  # Check if the commit message is first release.
-  if [[ $COMMIT_MESSAGE == 'FIRST RELEASE:'* ]]; then
-    if [ "$major_version" == 0 ]; then
-      new_tag="1.0.0"
-      echo "The initial major version was identified."
-      echo "version=$new_tag" >> $GITHUB_OUTPUT
-      echo "New generated version: $new_tag."
+check_commit_for_first_release() {
+  if is_first_release "${1}"; then
+    if is_non_public_version "${2}"; then
+      printf "The initial major version was identified.\n"
+      printf "version=1.0.0" >> "${GITHUB_OUTPUT}"
+      printf "New generated version: 1.0.0.\n"
       exit 0
     fi
   fi
+}
 
-  # Check if the commit message is from a hotfix
-  if [[ $COMMIT_MESSAGE == 'fix:'* ]]; then
+check_commit_for_patch_change() {
+  if is_fix "${1}"; then
+    local patch_version="${4}"
     patch_version=$((patch_version + 1))
-  else
-    minor_version=$((minor_version + 1))
-    patch_version=0
-  fi
 
-  # Create the new tag version.
-  new_tag="${major_version}.${minor_version}.${patch_version}"
-  echo "version=$new_tag" >> $GITHUB_OUTPUT
-  echo "New generated version: $new_tag."
-  exit 0
-fi
+    local new_tag="${2}.${3}.${patch_version}"
 
-# Search for commits that contains BREAKING CHANGE message to increment the major version.
-breaking_change_count=$(git log --format=%B $HEAD_COMMIT...$BASE_COMMIT | grep -c "$breaking_change_regex")
-if [[ $breaking_change_count -gt 0 ]]; then
-  major_version=$((major_version + 1))
-  new_tag="${major_version}.0.0"
-  echo "A breaking change was identified."
-  echo "version=$new_tag" >> $GITHUB_OUTPUT
-  echo "New generated version: $new_tag."
-  exit 0
-fi
-
-# Search for commits that contains FIRST RELEASE message to increment the major version.
-if [ "$major_version" == 0 ]; then
-  first_release_count=$(git log --format=%B $HEAD_COMMIT...$BASE_COMMIT | grep -c '^FIRST RELEASE:.*')
-  if [[ $first_release_count -gt 0 ]]; then
-    new_tag="1.0.0"
-    echo "The initial major version was identified."
-    echo "version=$new_tag" >> $GITHUB_OUTPUT
-    echo "New generated version: $new_tag."
+    printf "A fix was identified.\n"
+    printf "version=%s" "${new_tag}" >> "${GITHUB_OUTPUT}"
+    printf "New generated version: %s.\n" "${new_tag}"
     exit 0
   fi
-fi
+}
 
-if [[ -z "$ORIGIN_BRANCH" ]]; then
-  echo "'ORIGIN_BRANCH' is required."
-  exit 1
-fi
-
-if [[ -z "$FEATURE_BRANCHES" ]]; then
-  feature_branches=("feature")
-  echo "Feature branch names not found. Using default value: feature."
-else
-  feature_branches=($FEATURE_BRANCHES)
-fi
-
-if [[ -z "$RELEASE_BRANCHES" ]]; then
-  release_branches=("release")
-  echo "Release branch names not found. Using default value: release."
-else
-  release_branches=($RELEASE_BRANCHES)
-fi
-
-if [[ -z "$HOTFIX_BRANCHES" ]]; then
-  hotfix_branches=("hotfix")
-  echo "Hotfix branch names not found. Using default value: hotfix."
-else
-  hotfix_branches=($HOTFIX_BRANCHES)
-fi
-
-for i in "${feature_branches[@]}"; do
-  if [[ "$ORIGIN_BRANCH" == "$i/"*  ]]; then
-    is_feature_branch=true
-    echo "$ORIGIN_BRANCH is a feature branch."
-    break
-  fi
-done
-
-for i in "${release_branches[@]}"; do
-  if [[ "$ORIGIN_BRANCH" == "$i/"*  ]]; then
-    is_release_branch=true
-    echo "$ORIGIN_BRANCH is a release branch."
-    break
-  fi
-done
-
-for i in "${hotfix_branches[@]}"; do
-  if [[ "$ORIGIN_BRANCH" == "$i/"*  ]]; then
-    is_hotfix_branch=true
-    echo "$ORIGIN_BRANCH is a hotfix branch."
-    break
-  fi
-done
-
-# Increment the version according to the branch prefix.
-if [[ $is_feature_branch == true || $is_release_branch == true ]]; then
+do_minor_change() {
+  local minor_version="${2}"
   minor_version=$((minor_version + 1))
-  patch_version=0
-elif [[ $is_hotfix_branch == true ]]; then
-  patch_version=$((patch_version + 1))
-else
-  echo "Invalid branch to automatically generate version."
-  exit 1
-fi
+  local new_tag="${1}.${minor_version}.0"
 
-# Create the new tag version.
-new_tag="${major_version}.${minor_version}.${patch_version}"
-echo "version=$new_tag" >> $GITHUB_OUTPUT
-echo "New generated version: $new_tag."
+  printf "A minor change was identified.\n"
+  printf "version=%s" "${new_tag}" >> "${GITHUB_OUTPUT}"
+  printf "New generated version: %s.\n" "${new_tag}"
+  exit 0
+}
+
+check_pull_request_breaking_change() {
+  breaking_change_count=$(git log --format=%B ${1}...${2} | grep -c "^BREAKING CHANGE:.*$|^.*[^[:space:]]+!:.*$")
+  if [[ "${breaking_change_count}" -gt 0 ]]; then
+    major_version="${3}"
+    major_version=$((major_version + 1))
+    new_tag="${major_version}.0.0"
+
+    printf "A breaking change was identified.\n"
+    printf "version=%s" "${new_tag}" >> "${GITHUB_OUTPUT}"
+    printf "New generated version: %s.\n" "${new_tag}"
+    exit 0
+  fi
+}
+
+check_pull_request_for_first_release() {
+  if is_non_public_version "${3}"; then
+    local first_release_count=$(git log --format=%B ${1}...${2} | grep -c '^FIRST RELEASE:.*')
+    if [[ "${first_release_count}" -gt 0 ]]; then
+      printf "The initial major version was identified.\n"
+      printf "version=1.0.0" >> "${GITHUB_OUTPUT}"
+      printf "New generated version: 1.0.0.\n"
+      exit 0
+    fi
+  fi
+}
+
+check_pull_request_for_minor_changes() {
+  local feature_branches=("${2[@]}")
+
+  if is_missing "${2}"; then
+    feature_branches=("feature")
+    printf "Feature branch names not found. Using default value: feature.\n"
+  fi
+
+  local release_branches=("${3[@]}")
+
+  if is_missing "${3}"; then
+    release_branches=("release")
+    printf "Release branch names not found. Using default value: release.\n"
+  fi
+
+  if is_minor_change "${1}" "${feature_branches}" "${release_branches}"; then
+    local minor_version="${4}"
+    minor_version=$((minor_version + 1))
+
+    local new_tag="${4}.${5}.0"
+    printf "version=%s" "${new_tag}" >> "${GITHUB_OUTPUT}"
+    printf "New generated version: %s.\n" "${new_tag}"
+    exit 0
+  fi
+}
+
+check_pull_request_for_patch_changes() {
+  local hotfix_branches=("${2[@]}")
+
+  if is_missing "${2}"; then
+    hotfix_branches=("hotfix")
+    printf "Hotfix branch names not found. Using default value: hotfix.\n"
+  fi
+
+  if $(is_in_branches_list "${hotfix_branches[@]}" "${1}"); then
+    local patch_version="${5}"
+    patch_version=$((patch_version + 1))
+
+    local new_tag="${4}.${5}.${patch_version}"
+    printf "version=%s" "${new_tag}" >> "${GITHUB_OUTPUT}"
+    printf "New generated version: %s.\n" "${new_tag}"
+    exit 0
+  fi
+}
+
+is_in_branches_list() {
+  local branches_list=("${1}")
+  local is_feature_branch=false
+
+  for i in "${branches_list[@]}"; do
+    if contains "${2}" "${i}"; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+get_version() {
+  if is_missing "${LAST_VERSION}"; then
+    printf "There is no version associated with this program yet.\n"
+    printf "version=0.1.0" >> "${GITHUB_OUTPUT}"
+    printf "New generated version: 0.1.0.\n"
+    exit 0
+  fi
+
+  printf "Last stable version: %s.\n" "${LAST_VERSION}"
+
+  if ! is_valid_version "${LAST_VERSION}"; then
+    printf "The last found version does not match a valid semantic versioning pattern.\n"
+    exit 1
+  fi
+  
+  local major_version="${BASH_REMATCH[1]}"
+  local minor_version="${BASH_REMATCH[2]}"
+  local patch_version="${BASH_REMATCH[3]}"
+
+  local missing_commit_sha=false
+
+  if is_missing "${HEAD_COMMIT}"; then
+    missing_commit_sha=true
+  fi
+
+  if is_missing "${BASE_COMMIT}"; then
+    missing_commit_sha=true
+  fi
+
+  if [[ "${missing_commit_sha}" && $(is_missing "${COMMIT_MESSAGE}") ]]; then
+    printf "You need to inform 'HEAD_COMMIT' and 'BASE_COMMIT' or inform 'COMMIT_MESSAGE' to proceed.\n"
+    exit 1
+  fi
+
+  if [[ "${missing_commit_sha}" ]]; then
+    check_commit_for_breaking_change "${COMMIT_MESSAGE}" "${major_version}"
+    check_commit_for_first_release "${COMMIT_MESSAGE}" "${major_version}"
+    check_commit_for_patch_change "${COMMIT_MESSAGE}" "${major_version}" "${minor_version}" "${patch_version}"
+    do_minor_change "${major_version}" "${minor_version}"
+  fi
+
+  check_pull_request_for_breaking_change "${HEAD_COMMIT}" "${BASE_COMMIT}" "${major_version}"
+  check_pull_request_for_first_release "${HEAD_COMMIT}" "${BASE_COMMIT}" "${major_version}"
+
+  if is_missing "${ORIGIN_BRANCH}"; then
+    printf "'ORIGIN_BRANCH' is required.\n"
+    exit 1
+  fi
+
+  check_pull_request_for_minor_changes "${ORIGIN_BRANCH}" "${FEATURE_BRANCHES}" "${RELEASE_BRANCHES}" "${major_version}" "${minor_version}"
+  check_pull_request_for_patch_changes "${ORIGIN_BRANCH}" "${HOTFIX_BRANCHES}" "${major_version}" "${minor_version}" "${patch_version}"
+
+  printf "Invalid branch to automatically generate version.\n"
+  exit 1
+}
+
+get_version
