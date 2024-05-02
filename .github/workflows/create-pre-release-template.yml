@@ -15,6 +15,15 @@ on:
       hotfix_branches:
         required: false
         type: string
+      use_v_prefix:
+        required: false
+        type: boolean
+      release_name:
+        required: false
+        type: string
+      release_name_prefix:
+        required: false
+        type: string
     outputs:
       version:
         description: The new generated version

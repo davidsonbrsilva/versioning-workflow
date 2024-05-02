@@ -14,5 +14,8 @@ jobs:
       feature_branches: "feature"
       release_branches: "release"
       hotfix_branches: "hotfix"
+      use_v_prefix: false
+      release_name:
+      release_name_prefix:
     permissions:
       contents: write
