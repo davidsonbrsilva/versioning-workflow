@@ -230,3 +230,5 @@ get_version() {
   printf "Invalid branch to automatically generate version.\n"
   exit 1
 }
+
+get_version
