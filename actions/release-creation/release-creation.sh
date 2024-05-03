@@ -4,7 +4,6 @@ readonly GITHUB_REPOSITORY
 readonly GITHUB_TOKEN
 readonly VERSION
 readonly TARGET_COMMIT
-readonly RELEASE_NAME
 readonly PRE_RELEASE
 readonly USE_V_PREFIX
 readonly RELEASE_NAME
