@@ -95,6 +95,8 @@ create_release() {
     }" \
     ${url})
 
+  echo "${response_code}"
+
   if is_release_created "${response_code}"; then
     printf "version=%s" "${version}" >> "${GITHUB_OUTPUT}"
     printf "New generated release: %s\n" "${version}"
