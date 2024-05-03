@@ -80,7 +80,7 @@ create_release() {
 
   local url="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases"
 
-  local response_code=$(curl -s -o -w "%{http_code}" \
+  local response_code=$(curl -s -o /dev/null -w "%{http_code}" \
     -X POST \
     -H "Accept: application/vnd.github+json" \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
