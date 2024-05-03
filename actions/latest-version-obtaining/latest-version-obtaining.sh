@@ -17,7 +17,7 @@ fetch_tags_from_remote() {
 }
 
 get_last_origin_branch_version() {
-  git tag --sort=committerdate --merged=$(git rev-parse "origin/${1}") | grep -v '^v' | tail --lines 1
+  git tag --sort=committerdate --merged=$(git rev-parse "origin/${1}") | grep -v '^v[0-9]+$' | tail --lines 1
 }
 
 get_last_repository_version() {
