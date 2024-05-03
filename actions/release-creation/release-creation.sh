@@ -23,7 +23,7 @@ is_pre_release() {
 }
 
 is_release_created() {
-  [ "${1}" -eq "201" ]
+  [[ "${1}" -eq "201" ]]
 }
 
 check_required_parameters() {
