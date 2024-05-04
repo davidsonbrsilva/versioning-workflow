@@ -36,7 +36,7 @@ is_fix() {
 }
 
 is_minor_change() {
-  [[ $(is_in_branches_list "${2[@]}" "${1}") || $(is_in_branches_list "${3[@]}" "${1}") ]]
+  is_in_branches_list "${2}" "${1}" || is_in_branches_list "${3}" "${1}"
 }
 
 contains() {
@@ -93,7 +93,7 @@ do_minor_change() {
   exit 0
 }
 
-check_pull_request_breaking_change() {
+check_pull_request_for_breaking_change() {
   breaking_change_count=$(git log --format=%B ${1}...${2} | grep -c "^BREAKING CHANGE:.*$|^.*[^[:space:]]+!:.*$")
   if [[ "${breaking_change_count}" -gt 0 ]]; then
     major_version="${3}"
@@ -120,25 +120,25 @@ check_pull_request_for_first_release() {
 }
 
 check_pull_request_for_minor_changes() {
-  local feature_branches=("${2[@]}")
+  local feature_branches=("${2}")
 
-  if is_missing "${2}"; then
+  if is_missing "${feature_branches}"; then
     feature_branches=("feature")
     printf "Feature branch names not found. Using default value: feature.\n"
   fi
 
-  local release_branches=("${3[@]}")
+  local release_branches=("${3}")
 
-  if is_missing "${3}"; then
+  if is_missing "${release_branches}"; then
     release_branches=("release")
     printf "Release branch names not found. Using default value: release.\n"
   fi
 
   if is_minor_change "${1}" "${feature_branches}" "${release_branches}"; then
-    local minor_version="${4}"
+    local minor_version="${5}"
     minor_version=$((minor_version + 1))
 
-    local new_tag="${4}.${5}.0"
+    local new_tag="${4}.${minor_version}.0"
     printf "version=%s" "${new_tag}" >> "${GITHUB_OUTPUT}"
     printf "New generated version: %s.\n" "${new_tag}"
     exit 0
@@ -146,18 +146,18 @@ check_pull_request_for_minor_changes() {
 }
 
 check_pull_request_for_patch_changes() {
-  local hotfix_branches=("${2[@]}")
+  local hotfix_branches=("${2}")
 
   if is_missing "${2}"; then
     hotfix_branches=("hotfix")
     printf "Hotfix branch names not found. Using default value: hotfix.\n"
   fi
 
-  if $(is_in_branches_list "${hotfix_branches[@]}" "${1}"); then
+  if is_in_branches_list "${hotfix_branches}" "${1}"; then
     local patch_version="${5}"
     patch_version=$((patch_version + 1))
 
-    local new_tag="${4}.${5}.${patch_version}"
+    local new_tag="${3}.${4}.${patch_version}"
     printf "version=%s" "${new_tag}" >> "${GITHUB_OUTPUT}"
     printf "New generated version: %s.\n" "${new_tag}"
     exit 0
@@ -165,8 +165,8 @@ check_pull_request_for_patch_changes() {
 }
 
 is_in_branches_list() {
-  local branches_list=("${1}")
-  local is_feature_branch=false
+  local branches_list_string=("${1}")
+  read -ra branches_list <<< "${branches_list_string}"
 
   for i in "${branches_list[@]}"; do
     if contains "${2}" "${i}"; then
@@ -206,12 +206,12 @@ get_version() {
     missing_commit_sha=true
   fi
 
-  if [[ "${missing_commit_sha}" && $(is_missing "${COMMIT_MESSAGE}") ]]; then
+  if [[ "${missing_commit_sha}" == true && $(is_missing "${COMMIT_MESSAGE}") ]]; then
     printf "You need to inform 'HEAD_COMMIT' and 'BASE_COMMIT' or inform 'COMMIT_MESSAGE' to proceed.\n"
     exit 1
   fi
 
-  if [[ "${missing_commit_sha}" ]]; then
+  if [[ "${missing_commit_sha}" == true ]]; then
     check_commit_for_breaking_change "${COMMIT_MESSAGE}" "${major_version}"
     check_commit_for_first_release "${COMMIT_MESSAGE}" "${major_version}"
     check_commit_for_patch_change "${COMMIT_MESSAGE}" "${major_version}" "${minor_version}" "${patch_version}"
