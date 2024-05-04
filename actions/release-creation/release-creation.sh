@@ -29,22 +29,22 @@ check_required_parameters() {
   local missing_parameter=false
 
   if is_missing "${GITHUB_REPOSITORY}"; then
-    printf "'GITHUB_REPOSITORY' is required."
+    printf "'GITHUB_REPOSITORY' is required.\n"
     missing_parameter=true
   fi
 
   if is_missing "${GITHUB_TOKEN}"; then
-    printf "'GITHUB_TOKEN' is required."
+    printf "'GITHUB_TOKEN' is required.\n"
     missing_parameter=true
   fi
 
   if is_missing "${VERSION}"; then
-    printf "'VERSION' is required."
+    printf "'VERSION' is required.\n"
     missing_parameter=true
   fi
 
   if is_missing "${TARGET_COMMIT}"; then
-    printf "'TARGET_COMMIT' is required."
+    printf "'TARGET_COMMIT' is required.\n"
     missing_parameter=true
   fi
 
@@ -95,7 +95,7 @@ create_release() {
     }" \
     ${url})
 
-  echo "${response_code}"
+  echo "Response code: ${response_code}"
 
   if is_release_created "${response_code}"; then
     printf "version=%s" "${version}" >> "${GITHUB_OUTPUT}"
@@ -103,7 +103,7 @@ create_release() {
     exit 0
   fi
 
-  printf "Failed to generate release."
+  printf "Failed to generate release.\n"
   exit 1
 }
 
