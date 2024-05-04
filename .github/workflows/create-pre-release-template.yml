@@ -43,7 +43,7 @@ jobs:
 
       - name: Get last version
         id: get_last_version
-        uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@v1
+        uses: davidsonbrsilva/versioning-workflow/actions/latest-version-obtaining@hotfix/updating-documentation
         with:
           main_branch: ${{ inputs.main_branch }}
 
@@ -92,7 +92,7 @@ jobs:
 
       - name: Generate next release version
         id: generate_next_release
-        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@v1
+        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@hotfix/updating-documentation
         with:
           commit_message: ${{ needs.check_major_change.outputs.commit_message }}
           last_version: ${{ needs.get_last_version.outputs.last_version }}
@@ -113,7 +113,7 @@ jobs:
 
       - name: Generate next release version
         id: generate_next_release
-        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@v1
+        uses: davidsonbrsilva/versioning-workflow/actions/release-versioning@hotfix/updating-documentation
         with:
           origin_branch: ${{ github.head_ref }}
           head_commit: ${{ github.event.pull_request.head.sha }}
@@ -144,7 +144,7 @@ jobs:
 
       - name: Add release candidate suffix
         id: add_rc_suffix
-        uses: davidsonbrsilva/versioning-workflow/actions/release-candidate-suffix-adding@v1
+        uses: davidsonbrsilva/versioning-workflow/actions/release-candidate-suffix-adding@hotfix/updating-documentation
         with:
           version: ${{ needs.generate_breaking_change_version.outputs.version || needs.generate_first_release_candidate_version.outputs.version || needs.get_last_version.outputs.last_version}}
     if: |
@@ -164,7 +164,7 @@ jobs:
 
       - name: Create release
         id: create_release
-        uses: davidsonbrsilva/versioning-workflow/actions/release-creation@v1
+        uses: davidsonbrsilva/versioning-workflow/actions/release-creation@hotfix/updating-documentation
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ needs.add_release_candidate_suffix.outputs.version }}

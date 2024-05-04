@@ -8,7 +8,7 @@ on:
 jobs:
   create_release_candidate:
     name: Create release candidate
-    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@v1
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-pre-release-template.yml@hotfix/updating-documentation
     with:
       main_branch: "main"
       feature_branches: "feature"

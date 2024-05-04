@@ -7,7 +7,7 @@ on:
 jobs:
   create_release:
     name: Create release
-    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-release-template.yml@v1
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/create-release-template.yml@hotfix/updating-documentation
     with:
       main_branch: "main"
       use_v_prefix: false
@@ -20,6 +20,6 @@ jobs:
     needs: create_release
     permissions:
       contents: write
-    uses: davidsonbrsilva/versioning-workflow/.github/workflows/upsert-major-version-template.yml@v1
+    uses: davidsonbrsilva/versioning-workflow/.github/workflows/upsert-major-version-template.yml@hotfix/updating-documentation
     with:
       version: ${{ needs.create_release.outputs.version }}
