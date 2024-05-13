@@ -29,6 +29,10 @@ is_version_published() {
   [[ -n "${result}" ]]
 }
 
+is_different() {
+  [[ "${1}" != "${2}" ]]
+}
+
 get_newest_version_between() {
   printf "%s\n%s\n" "${1}" "${2}" | sort --version-sort | tail --lines 1
 }
@@ -57,13 +61,17 @@ get_last_version() {
   local version=$(get_newest_version_between "${last_origin_branch_version}" "${last_repository_version}")
 
   if is_version_published "${last_origin_branch_version}" "${main_branch}"; then
-    version="${last_origin_branch_version}"
-    printf "The origin branch version is in '%s'.\n" "${main_branch}"
+    if is_different "${origin_branch}" "${main_branch}"; then
+      version="${last_origin_branch_version}"
+      printf "The origin branch version is in '%s'.\n" "${main_branch}"
+    fi
   fi
 
   if is_version_published "${last_repository_version}" "${main_branch}"; then
-    version="${last_repository_version}"
-    printf "The repository version is in '%s'.\n" "${main_branch}"
+    if is_different "${origin_branch}" "${main_branch}"; then
+      version="${last_repository_version}"
+      printf "The repository version is in '%s'.\n" "${main_branch}"
+    fi
   fi
 
   if is_missing "${version}"; then
